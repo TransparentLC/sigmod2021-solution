@@ -115,3 +115,6 @@ dmypy.json
 
 .idea/
 .vscode/
+
+test.csv
+extract-test.csv
