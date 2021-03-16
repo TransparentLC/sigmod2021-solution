@@ -8,6 +8,8 @@ if __name__ == '__main__':
     data = pd.read_csv('datasets/X2.csv', dtype=pd.StringDtype())
     data['x_brand'] = pd.Series(dtype=pd.StringDtype())
     data['x_weight'] = pd.Series(dtype=pd.Float32Dtype())
+    data['x_hdd_capacity'] = pd.Series(dtype=pd.Int32Dtype())
+    data['x_ssd_capacity'] = pd.Series(dtype=pd.Int32Dtype())
 
     # 把所有数据转为小写
     for index, row in data.iterrows():
@@ -19,6 +21,7 @@ if __name__ == '__main__':
     for index, row in data.iterrows():
         data.loc[index, 'x_brand'] = extract.brand(row)
         data.loc[index, 'x_weight'] = extract.weight(row)
+        data.loc[index, 'x_hdd_capacity'], data.loc[index, 'x_ssd_capacity'] = extract.diskCapacity(row)
 
     print(data)
 
