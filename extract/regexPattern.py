@@ -12,8 +12,8 @@ brand = {k: re.compile(v) for k, v in {
     'lenovo': r'\b(?:lenovo|thinkpad)\b',
 }.items()}
 
-weight = re.compile(r'\b([0-9]*\.?[0-9]+) ?((?:kg|pounds|lbs|g))\b')
+weight = re.compile(r'\b([0-9]*\.?[0-9]+) ?((?:kg|pounds|lbs))\b')
 
-disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(hdd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
+disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
 
 cpuBrand=re.compile(r'(intel|amd)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a)(-|\s)([0-9]+|[a-z]+)|\s[a-z]+|)')

@@ -29,16 +29,14 @@ def weight(s: pd.core.series.Series) -> typing.Optional[float]:
                 if unit in ('lbs', 'pounds'):
                     value = round(float(m[0]) * .45359237, 2)
                     break
-                elif unit == 'g':
-                    value = float(m[0]) / 1000
-                    break
             return value
 
 def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
     # 同时返回HDD和SSD的大小，以GB为单位
-    # 先获取HDD的大小
     hdd = 0
     ssd = 0
+    hddGuess = False
+    ssdGuess = False
     for col in ('hdd_capacity', 'ssd_capacity', 'title'):
         if pd.isna(s[col]):
             continue
@@ -49,17 +47,30 @@ def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
             capacity = int(m[0]) # type: int
             unit = m[1] # type: str
             type = m[2] # type: typing.Optional[str]
+            # 经常有“8gb ram - 128gb ssd”这种写法，这个RAM很容易混淆
+            # 所以把大小后面的RAM也写到正则表达式里（就像大小后面的HDD或SSD等等一样）
+            # 但是这种时候就跳过
+            if type == 'ram':
+                continue
             if unit == 'tb':
                 capacity *= 1024
-            # 只有在HDD那一列搜索时才不要求出现类型
-            if type in ('hdd', 'sata', 'mechanical_hard_drive', 'hard drive') or (type == '' and col == 'hdd_capacity'):
+            # 只有在HDD/SSD那一列搜索时才不要求出现类型
+            # 但是也有title写着ssd，hdd_capacity也写着ssd，但是ssd_capacity空着的情况
+            # 这样的结果就是HDD和SSD都是相同的值，需要把其中一个设为0
+            if type == '' and col == 'hdd_capacity' or type in ('hdd', 'sata', 'mechanical_hard_drive', 'hard drive'):
+                hddGuess = type == '' and col == 'hdd_capacity'
                 hdd = capacity
-            # 只有在SSD那一列搜索时才不要求出现类型
-            elif type in ('ssd', 'flash_memory_solid_state') or (type == '' and col == 'ssd_capacity'):
+            elif type == '' and col == 'ssd_capacity' or type in ('ssd', 'flash_memory_solid_state'):
+                ssdGuess = type == '' and col == 'ssd_capacity'
                 ssd = capacity
 
     if hdd == 0 and ssd == 0:
         warnings.warn(f'Unable to extract disk capacity for "{s["title"]}".')
+    elif hdd == ssd:
+        if hddGuess:
+            hdd = 0
+        elif ssdGuess:
+            ssd = 0
     return (hdd, ssd)
 
 def cpuBrand(s: pd.core.series.Series) -> str:
