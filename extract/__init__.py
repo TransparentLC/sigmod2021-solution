@@ -61,3 +61,10 @@ def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
     if hdd == 0 and ssd == 0:
         warnings.warn(f'Unable to extract disk capacity for "{s["title"]}".')
     return (hdd, ssd)
+
+def cpuBrand(s: pd.core.series.Series) -> str:
+    if(not pd.isna(s['cpu_brand'])):
+        match=re.search(regexPattern.cpuBrand,s['cpu_brand'])
+        return match.group()
+    else:
+        return None
