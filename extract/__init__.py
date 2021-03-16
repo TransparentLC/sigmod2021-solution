@@ -79,3 +79,10 @@ def cpuBrand(s: pd.core.series.Series) -> str:
         return match.group()
     else:
         return None
+                   
+def cpuFrequency(s: pd.core.series.Series) -> str:
+    if(not pd.isna(s['cpu_frequency'])):
+        match=re.search(regexPattern.cpuFrequency,s['cpu_frequency'])
+        if(not pd.isna(match)):
+            return match.group()
+    return None
