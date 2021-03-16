@@ -33,3 +33,10 @@ def weight(s: pd.core.series.Series) -> typing.Optional[float]:
                     value = float(m[0]) / 1000
                     break
             return value
+
+def cpuBrand(s: pd.core.series.Series) -> str:
+    if(not pd.isna(s['cpu_brand'])):
+        match=re.search(regexPattern.cpuBrand,s['cpu_brand'])
+        return match.group()
+    else:
+        return None
