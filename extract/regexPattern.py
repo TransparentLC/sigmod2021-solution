@@ -13,3 +13,5 @@ brand = {k: re.compile(v) for k, v in {
 }.items()}
 
 weight = re.compile(r'\b([0-9]*\.?[0-9]+) ?((?:kg|pounds|lbs|g))\b')
+
+cpuBrand=re.compile(r'(intel|amd)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a)(-|\s)([0-9]+|[a-z]+)|\s[a-z]+|)')
