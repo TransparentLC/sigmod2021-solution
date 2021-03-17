@@ -74,29 +74,32 @@ def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
     return (hdd, ssd)
 
 def cpuBrand(s: pd.core.series.Series) -> str:
-    if(not pd.isna(s['cpu_brand'])):
-        match=re.search(regexPattern.cpuBrand,s['cpu_brand'])
+    if not pd.isna(s['cpu_brand']):
+        match = re.search(regexPattern.cpuBrand, s['cpu_brand'])
         return match.group()
-    else:
-        return None
+    warnings.warn(f'Unable to extract CPU brand for "{s["title"]}".')
+    return None
                    
 def cpuFrequency(s: pd.core.series.Series) -> str:
-    if(not pd.isna(s['cpu_frequency'])):
-        match=re.search(regexPattern.cpuFrequency,s['cpu_frequency'])
-        if(not pd.isna(match)):
+    if not pd.isna(s['cpu_frequency']):
+        match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
+        if not (match is None):
             return match.group()
+    warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
                       
 def ramCapacity(s: pd.core.series.Series) -> str:
-    if(not pd.isna(s['ram_capacity'])):
-        match=re.search(regexPattern.ramCapacity,s['ram_capacity'])
-        if(not pd.isna(match)):
+    if not pd.isna(s['ram_capacity']) :
+        match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
+        if not (match is None):
             return match.group()
+    warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
 def ramType(s: pd.core.series.Series) -> str:
-    if(not pd.isna(s['ram_type'])):
-        match=re.search(regexPattern.ramType,s['ram_type'])
-        if(not pd.isna(match)):
+    if not pd.isna(s['ram_type']) :
+        match = re.search(regexPattern.ramType,s['ram_type'])
+        if not (match is None):
             return match.group()
+    warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
     return None
