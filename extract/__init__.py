@@ -31,7 +31,7 @@ def weight(s: pd.core.series.Series) -> typing.Optional[float]:
                     break
             return value
 
-def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
+def diskCapacity(s: pd.core.series.Series) -> pd.Series:
     # 同时返回HDD和SSD的大小，以GB为单位
     hdd = 0
     ssd = 0
@@ -71,7 +71,7 @@ def diskCapacity(s: pd.core.series.Series) -> tuple[int, int]:
             hdd = 0
         elif ssdGuess:
             ssd = 0
-    return (hdd, ssd)
+    return pd.Series((hdd, ssd))
 
 def cpuBrand(s: pd.core.series.Series) -> str:
     if not pd.isna(s['cpu_brand']):
