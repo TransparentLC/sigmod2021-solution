@@ -86,3 +86,10 @@ def cpuFrequency(s: pd.core.series.Series) -> str:
         if(not pd.isna(match)):
             return match.group()
     return None
+                      
+def ramCapacity(s: pd.core.series.Series) -> str:
+    if(not pd.isna(s['ram_capacity'])):
+        match=re.search(regexPattern.ramCapacity,s['ram_capacity'])
+        if(not pd.isna(match)):
+            return match.group()
+    return None
