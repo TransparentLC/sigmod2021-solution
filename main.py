@@ -21,18 +21,38 @@ if __name__ == '__main__':
             if not pd.isna(data.loc[index, col]):
                 data.loc[index, col] = data.loc[index, col].lower()
 
+    # 计算解析和写入数据的时间
+    timeExtract = 0
+    timeModifyData = 0
+
     # 通过正则表达式解析信息
     for index, row in data.iterrows():
-        data.loc[index, 'x_brand'] = extract.brand(row)
-        data.loc[index, 'x_weight'] = extract.weight(row)
-        data.loc[index, 'x_hdd_capacity'], data.loc[index, 'x_ssd_capacity'] = extract.diskCapacity(row)
-        data.loc[index,'x_cpu_brand'] = extract.cpuBrand(row)
-        data.loc[index,'x_cpu_frequency'] = extract.cpuFrequency(row)
-        data.loc[index,'x_ram_capacity'] = extract.ramCapacity(row)
-        data.loc[index,'x_ram_type'] = extract.ramType(row)
+        _ts = time.perf_counter()
+        brand = extract.brand(row)
+        weight = extract.weight(row)
+        diskCapacity = extract.diskCapacity(row)
+        cpuBrand = extract.cpuBrand(row)
+        cpuFrequency = extract.cpuFrequency(row)
+        ramCapacity = extract.ramCapacity(row)
+        ramType = extract.ramType(row)
+        _te = time.perf_counter()
+        timeExtract += _te - _ts
+
+        _ts = time.perf_counter()
+        data.loc[index, 'x_brand'] = brand
+        data.loc[index, 'x_weight'] = weight
+        data.loc[index, 'x_hdd_capacity'], data.loc[index, 'x_ssd_capacity'] = diskCapacity
+        data.loc[index,'x_cpu_brand'] = cpuBrand
+        data.loc[index,'x_cpu_frequency'] = cpuFrequency
+        data.loc[index,'x_ram_capacity'] = ramCapacity
+        data.loc[index,'x_ram_type'] = ramType
+        _te = time.perf_counter()
+        timeModifyData += _te - _ts
 
     print(data)
     data.to_csv('extract-test.csv')
     
     te = time.perf_counter()
-    print(te - ts)
+    print('Extract time:', timeExtract)
+    print('Modify data time:', timeModifyData)
+    print('Total time:', te - ts)
