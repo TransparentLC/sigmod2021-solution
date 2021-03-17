@@ -93,3 +93,10 @@ def ramCapacity(s: pd.core.series.Series) -> str:
         if(not pd.isna(match)):
             return match.group()
     return None
+
+def ramType(s: pd.core.series.Series) -> str:
+    if(not pd.isna(s['ram_type'])):
+        match=re.search(regexPattern.ramType,s['ram_type'])
+        if(not pd.isna(match)):
+            return match.group()
+    return None

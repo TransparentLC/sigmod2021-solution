@@ -21,3 +21,5 @@ cpuBrand=re.compile(r'(intel|amd|core)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a
 cpuFrequency=re.compile(r'[0-9](.|)([0-9]+|)(\s|)(ghz|mhz)')
 
 ramCapacity=re.compile(r'[0-9]+(\s|)(gb|mb)')
+
+ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
