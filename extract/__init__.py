@@ -79,7 +79,25 @@ def cpuBrand(s: pd.core.series.Series) -> str:
         return match.group()
     warnings.warn(f'Unable to extract CPU brand for "{s["title"]}".')
     return None
-                   
+   
+def cpuModel(s: pd.core.series.Series) -> str:
+    if not pd.isna(s['cpu_model']) :
+        match = re.search(regexPattern.cpuModel,s['cpu_model'])
+        if not (match is None):
+            return match.group()
+        match=re.search(regexPattern.cpuModel2,s['cpu_model'])
+        if not (match is None):
+            return match.group()       
+    if not pd.isna(s['cpu_brand']) :
+        match = re.search(regexPattern.cpuModel,s['cpu_brand'])
+        if not (match is None):
+            return match.group()
+        match=re.search(regexPattern.cpuModel2,s['cpu_brand'])
+        if not (match is None):
+            return match.group()
+    warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
+    return None
+                  
 def cpuFrequency(s: pd.core.series.Series) -> str:
     #单位GHz
     if not pd.isna(s['cpu_frequency']):

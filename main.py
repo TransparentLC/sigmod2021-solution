@@ -26,6 +26,7 @@ if __name__ == '__main__':
     data['x_weight'] = data.apply(extract.weight, axis=1)
     data[['x_hdd_capacity', 'x_ssd_capacity']] = data.apply(extract.diskCapacity, axis=1)
     data['x_cpu_brand'] = data.apply(extract.cpuBrand, axis=1)
+    data['x_cpu_model']=data.apply(extract.cpuModel,axis=1)
     data['x_cpu_frequency'] = data.apply(extract.cpuFrequency, axis=1)
     data['x_ram_capacity'] = data.apply(extract.ramCapacity, axis=1)
     data['x_ram_type'] = data.apply(extract.ramType, axis=1)
