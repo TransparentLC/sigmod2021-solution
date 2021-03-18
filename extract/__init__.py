@@ -81,18 +81,28 @@ def cpuBrand(s: pd.core.series.Series) -> str:
     return None
                    
 def cpuFrequency(s: pd.core.series.Series) -> str:
+    #单位GHz
     if not pd.isna(s['cpu_frequency']):
         match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
         if not (match is None):
-            return match.group()
+            fre_unit=match.group(3)
+            if(fre_unit=='mhz'):
+                fre=int(match.group(1))*0.001
+                return str(fre)
+            return match.group(1)
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
                       
 def ramCapacity(s: pd.core.series.Series) -> str:
+    #单位GB
     if not pd.isna(s['ram_capacity']) :
         match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
         if not (match is None):
-            return match.group()
+            cap_unit=match.group(3)
+            if(cap_unit=='mb'):
+                cap=int(match.group(1))*0.001
+                return str(cap)
+            return match.group(1)
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
