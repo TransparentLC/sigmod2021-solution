@@ -1,3 +1,4 @@
+import compare
 import extract
 import pandas as pd
 import time
@@ -32,8 +33,29 @@ if __name__ == '__main__':
     timeCounter['Extract'] = _te - _ts
 
     print(data)
-    data.to_csv('extract-test.csv')
-    
+    data.to_csv('extract-test.csv', index=False)
+
+    # 对比和输出数据
+    _ts = time.perf_counter()
+    # 直接往DataFrame里append的话太慢了……
+    # 所以这里用list保存
+    output = [] # type: list[str, str]
+    # 以品牌分组，在每个组里两两比较
+    for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
+        for indexA, seriesA in brandGroup.iterrows(): # type: int, pd.Series
+            for indexB, seriesB in brandGroup.iterrows():  # type: int, pd.Series
+                if indexA >= indexB:
+                    continue
+                if compare.notebook(seriesA, seriesB):
+                    output.append((seriesA['instance_id'], seriesB['instance_id']))
+    pd.DataFrame(
+        output,
+        columns=('left_instance_id', 'right_instance_id'),
+        dtype=pd.StringDtype()
+    ).to_csv('output.csv', index=False)
+    _te = time.perf_counter()
+    timeCounter['Output'] = _te - _ts
+
     te = time.perf_counter()
     timeCounter['Total'] = te - ts
     print('= Time Counter =')

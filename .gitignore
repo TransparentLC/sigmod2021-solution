@@ -118,3 +118,4 @@ dmypy.json
 
 test.csv
 extract-test.csv
+output.csv
