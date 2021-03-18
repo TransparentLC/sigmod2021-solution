@@ -36,7 +36,7 @@ if __name__ == '__main__':
     print(data)
     data.to_csv('extract-test.csv', index=False)
 
-    # 对比和输出数据
+    # 对比数据
     _ts = time.perf_counter()
     # 直接往DataFrame里append的话太慢了……
     # 所以这里用list保存
@@ -64,16 +64,20 @@ if __name__ == '__main__':
                 ),
             axis=1
         )
+    _te = time.perf_counter()
+    timeCounter['Match'] = _te - _ts
+
+    _ts = time.perf_counter()
     pd.DataFrame(
         output,
         columns=('left_instance_id', 'right_instance_id'),
         dtype=pd.StringDtype()
     ).to_csv('output.csv', index=False)
     _te = time.perf_counter()
-    timeCounter['Output'] = _te - _ts
+    timeCounter['Output csv'] = _te - _ts
 
     te = time.perf_counter()
     timeCounter['Total'] = te - ts
     print('= Time Counter =')
     for k, v in timeCounter.items(): # type: str, float
-        print(k, v)
+        print(f'{k:<{max(len(x) for x in timeCounter.keys())}} {v:.4f}ms {v / timeCounter["Total"] * 100:.2f}%')
