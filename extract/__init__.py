@@ -81,22 +81,33 @@ def cpuBrand(s: pd.core.series.Series) -> str:
     return None
    
 def cpuModel(s: pd.core.series.Series) -> str:
+    ms1,ms2,ms3='','',''
     if not pd.isna(s['cpu_model']) :
-        match = re.search(regexPattern.cpuModel,s['cpu_model'])
-        if not (match is None):
-            return match.group()
-        match=re.search(regexPattern.cpuModel2,s['cpu_model'])
-        if not (match is None):
-            return match.group()       
+        match1 = re.search(regexPattern.cpuModel,s['cpu_model'])
+        if (match1 is None):
+            match1=re.search(regexPattern.cpuModel2,s['cpu_model'])
+        if not (match1 is None):
+            ms1=match1.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
+        else:
+            ms1=''
+    if not pd.isna(s['title']) :
+        match2 = re.search(regexPattern.cpuMode3,s['title'])
+        if (match2 is None):
+            match2=re.search(regexPattern.cpuModel2,s['title'])
+        if not (match2 is None):
+            ms2=match2.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
+        else:
+            ms2=''
     if not pd.isna(s['cpu_brand']) :
-        match = re.search(regexPattern.cpuModel,s['cpu_brand'])
-        if not (match is None):
-            return match.group()
-        match=re.search(regexPattern.cpuModel2,s['cpu_brand'])
-        if not (match is None):
-            return match.group()
-    warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
-    return None
+        match3 = re.search(regexPattern.cpuModel,s['cpu_brand'])
+        if (match3 is None):
+            match3=re.search(regexPattern.cpuModel2,s['cpu_brand'])
+        if not (match3 is None):
+            ms3=match3.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
+        else:
+            ms3=''
+    match=max([ms1,ms2,ms3],key=len)
+    return match
                   
 def cpuFrequency(s: pd.core.series.Series) -> str:
     #单位GHz
