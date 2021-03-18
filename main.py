@@ -43,12 +43,26 @@ if __name__ == '__main__':
     # 以品牌分组，在每个组里两两比较
     for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
         print(f'Matching in group "{brand}"...')
-        for indexA, seriesA in brandGroup.iterrows(): # type: int, pd.Series
-            for indexB, seriesB in brandGroup.iterrows():  # type: int, pd.Series
-                if indexA >= indexB:
-                    continue
-                if compare.notebook(seriesA, seriesB):
-                    output.append((seriesA['instance_id'], seriesB['instance_id']))
+        # for indexA, seriesA in brandGroup.iterrows(): # type: int, pd.Series
+        #     for indexB, seriesB in brandGroup.iterrows():  # type: int, pd.Series
+        #         if indexA >= indexB:
+        #             continue
+        #         if compare.notebook(seriesA, seriesB):
+        #             output.append((seriesA['instance_id'], seriesB['instance_id']))
+        brandGroup.apply(
+            lambda seriesA:
+                brandGroup.apply(
+                    lambda  seriesB:
+                        # series.name就是每一行的index
+                        seriesA.name < seriesB.name and
+                        compare.notebook(seriesA, seriesB) and
+                        # 短路求值，前两个条件都成立就会执行这个
+                        # 至于这个返回什么已经不重要了
+                        output.append((seriesA['instance_id'], seriesB['instance_id'])),
+                    axis=1
+                ),
+            axis=1
+        )
     pd.DataFrame(
         output,
         columns=('left_instance_id', 'right_instance_id'),
