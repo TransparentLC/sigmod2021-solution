@@ -42,6 +42,7 @@ if __name__ == '__main__':
     output = [] # type: list[str, str]
     # 以品牌分组，在每个组里两两比较
     for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
+        print(f'Matching in group "{brand}"...')
         for indexA, seriesA in brandGroup.iterrows(): # type: int, pd.Series
             for indexB, seriesB in brandGroup.iterrows():  # type: int, pd.Series
                 if indexA >= indexB:
