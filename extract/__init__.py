@@ -91,7 +91,7 @@ def cpuModel(s: pd.core.series.Series) -> str:
         else:
             ms1=''
     if not pd.isna(s['title']) :
-        match2 = re.search(regexPattern.cpuMode3,s['title'])
+        match2 = re.search(regexPattern.cpuModel3,s['title'])
         if (match2 is None):
             match2=re.search(regexPattern.cpuModel2,s['title'])
         if not (match2 is None):
