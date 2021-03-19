@@ -107,7 +107,7 @@ def cpuModel(s: pd.core.series.Series) -> str:
         else:
             ms3=''
     match=max([ms1,ms2,ms3],key=len)
-    return match
+    return match.replace('-',' ')
                   
 def cpuFrequency(s: pd.core.series.Series) -> str:
     #单位GHz
