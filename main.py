@@ -2,6 +2,7 @@ import compare
 import extract
 import pandas as pd
 import time
+import typing
 
 if __name__ == '__main__':
     timeCounter = dict()
@@ -40,7 +41,7 @@ if __name__ == '__main__':
     _ts = time.perf_counter()
     # 直接往DataFrame里append的话太慢了……
     # 所以这里用list保存
-    output = [] # type: list[str, str]
+    output = [] # type: list[tuple[str, str]]
     # 以品牌分组，在每个组里两两比较
     for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
         print(f'Matching in group "{brand}"...')
@@ -53,7 +54,7 @@ if __name__ == '__main__':
         brandGroup.apply(
             lambda seriesA:
                 brandGroup.apply(
-                    lambda  seriesB:
+                    lambda seriesB:
                         # series.name就是每一行的index
                         seriesA.name < seriesB.name and
                         compare.notebook(seriesA, seriesB) and
@@ -64,6 +65,7 @@ if __name__ == '__main__':
                 ),
             axis=1
         )
+
     _te = time.perf_counter()
     timeCounter['Match'] = _te - _ts
 
@@ -80,4 +82,4 @@ if __name__ == '__main__':
     timeCounter['Total'] = te - ts
     print('= Time Counter =')
     for k, v in timeCounter.items(): # type: str, float
-        print(f'{k:<{max(len(x) for x in timeCounter.keys())}} {v:.4f}ms {v / timeCounter["Total"] * 100:.2f}%')
+        print(f'{k:<{max(len(x) for x in timeCounter.keys())}} {v:.4f}s {v / timeCounter["Total"] * 100:.2f}%')
