@@ -18,11 +18,11 @@ disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mech
 
 cpuBrand = re.compile(r'(intel|amd|core)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a)(-|\s)([0-9]+|[a-z]+)|\s[a-z]+|)')
 
-cpuModel=re.compile(r'(i|a|n)([0-9]+)(\s\(.+?\)\s|-|\s|)([0-9]+|)(u|m|lm|)')
+cpuModel=re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s|)([0-9]+|)(u|m|lm|)')
 
 cpuModel2=re.compile(r'(intel pentium|intel celeron)(\s[0-9]+|)(u|m|)')
 
-cpuModel3=re.compile(r'(i|a|n)([0-9]+)(\s\(.+?\)\s|-|\s)([0-9]+)(u|m|lm|)')
+cpuModel3=re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s)([0-9]+)(u|m|lm|)')
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
