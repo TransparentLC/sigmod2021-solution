@@ -115,7 +115,7 @@ dmypy.json
 
 .idea/
 .vscode/
-
-test.csv
+.reprozip-trace/
 extract-test.csv
 output.csv
+submission.rpz
