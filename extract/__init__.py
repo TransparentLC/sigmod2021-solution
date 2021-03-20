@@ -109,29 +109,32 @@ def cpuModel(s: pd.core.series.Series) -> str:
     match=max([ms1,ms2,ms3],key=len)
     return match.replace('-',' ')
                   
-def cpuFrequency(s: pd.core.series.Series) -> str:
+def cpuFrequency(s: pd.core.series.Series) -> float:
     #单位GHz
     if not pd.isna(s['cpu_frequency']):
         match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
         if not (match is None):
-            fre_unit=match.group(3)
-            if(fre_unit=='mhz'):
-                fre=int(match.group(1))*0.001
-                return str(fre)
-            return match.group(1)
+            fre_unit = match.group(3)
+            fre = float(match.group(1))
+            if fre_unit == 'mhz':
+                fre /= 1000
+            return fre
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
                       
-def ramCapacity(s: pd.core.series.Series) -> str:
+def ramCapacity(s: pd.core.series.Series) -> float:
     #单位GB
     if not pd.isna(s['ram_capacity']) :
         match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
         if not (match is None):
-            cap_unit=match.group(3)
-            if(cap_unit=='mb'):
-                cap=int(match.group(1))*0.001
-                return str(cap)
-            return match.group(1)
+            cap_unit = match.group(3)
+            cap = float(match.group(1))
+            # 修正某个把4GB打成4MB的情况
+            if cap_unit == 'mb' and cap >= 1024:
+                cap /= 1024
+            # 修正0GB的情况
+            if cap:
+                return cap
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 

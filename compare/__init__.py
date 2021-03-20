@@ -36,7 +36,7 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),
-            seriesA[colVeto]!=seriesB[colVeto],
+            seriesA[colVeto] != seriesB[colVeto],
         )):
             return False
 
