@@ -32,12 +32,12 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
         if (seriesA['x_ram_type'] not in seriesB['x_ram_type']) and (seriesB['x_ram_type'] not in seriesA['x_ram_type']):
             return False
         
-    for colVeto in ('x_cpu_frequency', 'x_ram_capacity'):
+    for colVeto in ('x_cpu_frequency', 'x_ram_capacity','x_win_type','x_number'):
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),
             seriesA[colVeto] != seriesB[colVeto],
         )):
             return False
-
+        
     return True
