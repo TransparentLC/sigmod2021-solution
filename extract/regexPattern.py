@@ -29,3 +29,7 @@ cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 ramCapacity = re.compile(r'([0-9]+)(\s|)(gb|mb)')
 
 ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
+
+winType=re.compile(r'windows(\s|)[0-9]')
+
+Number=re.compile(r'[a-h,j-z][0-9]+(-|\s|)([0-9]+|)')
