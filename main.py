@@ -18,18 +18,15 @@ def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str
 # 实际上要彻底破坏传递性的话，相当于在无向图中循环查找并删除所有A到B的路径
 # 但是这里先考虑路径长度为2的情况
 # 参数c就是上面的C了，通过df.apply调用时可以提供
-def removeTransitivity(c: str, matchPairs: set, notMatchPairs: set):
+def removeTransitivity(c: str, matchPairs: set, notMatchPairs: set) -> None:
     for a, b in notMatchPairs: # type: str, str
         if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
-            print(a, b, c)
             matchPairs.remove((a, c))
             matchPairs.remove((b, c))
         elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
-            print(a, c, b)
             matchPairs.remove((a, c))
             matchPairs.remove((c, b))
         elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
-            print(c, a, b)
             matchPairs.remove((c, a))
             matchPairs.remove((c, b))
 

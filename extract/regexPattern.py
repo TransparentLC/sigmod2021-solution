@@ -18,11 +18,11 @@ disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mech
 
 cpuBrand = re.compile(r'(intel|amd|core)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a)(-|\s)([0-9]+|[a-z]+)|\s[a-z]+|)')
 
-cpuModel=re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s|)([0-9]+|)(u|m|lm|)')
+cpuModel = re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s|)([0-9]+|)(u|m|lm|)')
 
-cpuModel2=re.compile(r'(intel pentium|intel celeron)(\s[0-9]+|)(u|m|)')
+cpuModel2 = re.compile(r'(intel pentium|intel celeron)(\s[0-9]+|)(u|m|)')
 
-cpuModel3=re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s)([0-9]+)(u|m|lm|)')
+cpuModel3 = re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s)([0-9]+)(u|m|lm|)')
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
@@ -30,6 +30,6 @@ ramCapacity = re.compile(r'([0-9]+)(\s|)(gb|mb)')
 
 ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
 
-winType=re.compile(r'windows(\s|)[0-9]')
+winType = re.compile(r'\b(?:windows|win) ([0-9]*\.?[0-9]+|xp) ?((?:professional|pro|home premium|home)?)\b')
 
-Number=re.compile(r'[a-h,j-z][0-9]+(-|\s|)([0-9]+|)')
+Number = re.compile(r'[a-h,j-z][0-9]+(-|\s|)([0-9]+|)')

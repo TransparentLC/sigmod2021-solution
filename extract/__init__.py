@@ -144,12 +144,21 @@ def ramType(s: pd.core.series.Series) -> str:
     warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
     return None
 
-def winType(s: pd.core.series.Series) -> str:
+def winType(s: pd.core.series.Series) -> typing.Optional[str]:
     if not pd.isna(s['title']) :
-        match = re.search(regexPattern.winType,s['title'])
+        match = re.search(regexPattern.winType, s['title'])
         if not (match is None):
-            return match.group()
-    warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
+            winVer = match.group(1)
+            winType = match.group(2)
+            if winType:
+                if winType == 'professional':
+                    winType = 'pro'
+                elif winType == 'home premium':
+                    winType = 'home'
+                return f'{winVer} {winType}'
+            else:
+                return winVer
+    warnings.warn(f'Unable to extract system for "{s["title"]}".')
     return None
 
 def Number(s: pd.core.series.Series) -> str:
