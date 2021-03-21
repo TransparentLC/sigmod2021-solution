@@ -7,10 +7,8 @@ def brand(s: pd.core.series.Series) -> str:
     for k, r in regexPattern.brand.items(): # type: str, re.Pattern
         if (not pd.isna(s['brand']) and r.search(s['brand'])) or r.search(s['title']):
             return k
-    # 找不到的话就使用brand的原始值
-    fallback = s['title'] if pd.isna(s['brand']) else s['brand']
-    warnings.warn(f'Unable to extract brand, fallback to "{fallback}".')
-    return fallback
+    warnings.warn(f'Unable to extract brand for "{s["title"]}".')
+    return 'other'
 
 def weight(s: pd.core.series.Series) -> typing.Optional[float]:
     matches = regexPattern.weight.findall(s['title'] if pd.isna(s['weight']) else s['weight']) # type: list[tuple[str, str]]
