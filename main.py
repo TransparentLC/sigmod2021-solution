@@ -53,12 +53,12 @@ if __name__ == '__main__':
     data['x_weight'] = data.apply(extract.weight, axis=1)
     data[['x_hdd_capacity', 'x_ssd_capacity']] = data.apply(extract.diskCapacity, axis=1)
     data['x_cpu_brand'] = data.apply(extract.cpuBrand, axis=1)
-    data['x_cpu_model']=data.apply(extract.cpuModel,axis=1)
+    data['x_cpu_model'] = data.apply(extract.cpuModel,axis=1)
     data['x_cpu_frequency'] = data.apply(extract.cpuFrequency, axis=1)
     data['x_ram_capacity'] = data.apply(extract.ramCapacity, axis=1)
     data['x_ram_type'] = data.apply(extract.ramType, axis=1)
     data['x_win_type'] = data.apply(extract.winType, axis=1)
-    data['x_number']=data.apply(extract.Number,axis=1)
+    data['x_model'] = data.apply(extract.model, axis=1)
     _te = time.perf_counter()
     timeCounter['Extract'] = _te - _ts
 

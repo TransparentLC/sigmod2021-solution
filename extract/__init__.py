@@ -161,11 +161,21 @@ def winType(s: pd.core.series.Series) -> typing.Optional[str]:
     warnings.warn(f'Unable to extract system for "{s["title"]}".')
     return None
 
-def Number(s: pd.core.series.Series) -> str:
-    if not pd.isna(s['title']) :
-        match = re.search(regexPattern.Number,s['title'])
+def model(s: pd.core.series.Series) -> typing.Optional[str]:
+    if not pd.isna(s['title']) and s['x_brand'] in regexPattern.model:
+        match = re.search(regexPattern.model[s['x_brand']], s['title'])
         if not (match is None):
-            if(len(match.group())>=4):
-                return match.group()
-    warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
+            m = match.group(1) # type: typing.Optional[str]
+            if s['x_brand'] == 'lenovo':
+                m += ' ' + match.group(2)
+            elif s['x_brand'] == 'hp':
+                # 那个正则表达式也可能误匹配到这些七个字母的词
+                if m in ('windows', 'revolve', 'hewlett', 'packard'):
+                    m = None
+                else:
+                    r = match.group(2) # type: typing.Optional[str]
+                    if r and m.endswith(r):
+                        m = m[:-len(r)]
+            return m
+    warnings.warn(f'Unable to extract model for "{s["title"]}".')
     return None
