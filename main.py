@@ -4,6 +4,35 @@ import pandas as pd
 import time
 import typing
 
+# 只是为了保证每一组match中两个id的顺序
+def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str]:
+    if instanceIdA >= instanceIdB:
+        instanceIdA, instanceIdB = instanceIdB, instanceIdA
+    return (instanceIdA, instanceIdB)
+
+# 已知A!=B，但是有A==C和B==C的记录，则最后还是会被认为有A==B
+# createMatchPair保证了A<B，根据ABC的大小关系有以下几种情况：
+# A<B<C 需要去掉A==C和B==C
+# A<C<B 需要去掉A==C和C==B
+# C<A<B 需要去掉C==A和C==B
+# 实际上要彻底破坏传递性的话，相当于在无向图中循环查找并删除所有A到B的路径
+# 但是这里先考虑路径长度为2的情况
+# 参数c就是上面的C了，通过df.apply调用时可以提供
+def removeTransitivity(c: str, matchPairs: set, notMatchPairs: set):
+    for a, b in notMatchPairs: # type: str, str
+        if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
+            print(a, b, c)
+            matchPairs.remove((a, c))
+            matchPairs.remove((b, c))
+        elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
+            print(a, c, b)
+            matchPairs.remove((a, c))
+            matchPairs.remove((c, b))
+        elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
+            print(c, a, b)
+            matchPairs.remove((c, a))
+            matchPairs.remove((c, b))
+
 if __name__ == '__main__':
     timeCounter = dict()
 
@@ -40,11 +69,14 @@ if __name__ == '__main__':
     # 对比数据
     _ts = time.perf_counter()
     # 直接往DataFrame里append的话太慢了……
-    # 所以这里用list保存
+    # 把比较成功和失败的一对都记下来
+    # 最后需要根据失败的记录删去某些成功的对来破坏传递性（后述）
     output = [] # type: list[tuple[str, str]]
     # 以品牌分组，在每个组里两两比较
     for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
         print(f'Matching in group "{brand}"...')
+        matchPairs = set() # type: set[tuple[str, str]]
+        notMatchPairs = set() # type: set[tuple[str, str]]
         # for indexA, seriesA in brandGroup.iterrows(): # type: int, pd.Series
         #     for indexB, seriesB in brandGroup.iterrows():  # type: int, pd.Series
         #         if indexA >= indexB:
@@ -56,16 +88,20 @@ if __name__ == '__main__':
                 brandGroup.apply(
                     lambda seriesB:
                         # series.name就是每一行的index
+                        # 短路求值，这个条件成立才会执行比较
                         seriesA.name < seriesB.name and
-                        compare.notebook(seriesA, seriesB) and
-                        # 短路求值，前两个条件都成立就会执行这个
                         # 至于这个返回什么已经不重要了
-                        output.append((seriesA['instance_id'], seriesB['instance_id'])),
+                        (matchPairs if compare.notebook(seriesA, seriesB) else notMatchPairs).add(createMatchPair(seriesA['instance_id'], seriesB['instance_id'])),
                     axis=1
                 ),
             axis=1
         )
-
+        # 破坏对比失败的传递性
+        brandGroup.apply(
+            lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs),
+            axis=1
+        )
+        output.extend(matchPairs)
     _te = time.perf_counter()
     timeCounter['Match'] = _te - _ts
 
