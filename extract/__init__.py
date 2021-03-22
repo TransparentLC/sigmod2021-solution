@@ -162,8 +162,12 @@ def winType(s: pd.core.series.Series) -> typing.Optional[str]:
     return None
 
 def model(s: pd.core.series.Series) -> typing.Optional[str]:
+    if 'elitebook' in s['title']:
+        match=re.search(regexPattern.model['hp2'], s['title'])
+        if not (match is None):
+            return match.group()
     if not pd.isna(s['title']) and s['x_brand'] in regexPattern.model:
-        match = re.search(regexPattern.model[s['x_brand']], s['title'])
+        match = re.search(regexPattern.model[s['x_brand']], s['title'].replace('15-series',''))
         if not (match is None):
             m = match.group(1) # type: typing.Optional[str]
             if s['x_brand'] == 'lenovo':
