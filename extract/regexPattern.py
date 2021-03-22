@@ -43,5 +43,6 @@ model = {k: re.compile(v) for k, v in {
     'asus': r'\b([a-z]+\d+[a-z]+-[a-z]+\d+[a-z]*)\b',
     'dell': r'\b([a-z\d]{5}(?:-[a-z\d]+)?)\b',
     'hp': r'\b((?:\d{2}[a-z]?-[a-z\d]{6})|(?:[a-z\d]{3})([a-z\d]{4}))\b',
+    'hp2':r'[0-9]+(\s|)(m|g|p)',   #elitebook
     'lenovo': r'\b(x\d{1,3})[a-z]?(?: (?:carbon|carbon touch|tablet|tablet pc|laptop))? (\d{4})[a-z\d]*\b',
 }.items()}
