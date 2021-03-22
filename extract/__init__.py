@@ -72,41 +72,27 @@ def diskCapacity(s: pd.core.series.Series) -> pd.Series:
     return pd.Series((hdd, ssd))
 
 def cpuBrand(s: pd.core.series.Series) -> str:
-    if not pd.isna(s['cpu_brand']):
-        match = re.search(regexPattern.cpuBrand, s['cpu_brand'])
-        return match.group()
+    for col in ('cpu_brand', 'cpu_model', 'title'):
+        if not pd.isna(s[col]):
+            for k, r in regexPattern.cpuBrand.items(): # type: str, re.Pattern
+                match = re.search(r, s[col])
+                if match:
+                    return k
     warnings.warn(f'Unable to extract CPU brand for "{s["title"]}".')
     return None
    
 def cpuModel(s: pd.core.series.Series) -> str:
-    ms1,ms2,ms3='','',''
-    if not pd.isna(s['cpu_model']) :
-        match1 = re.search(regexPattern.cpuModel,s['cpu_model'])
-        if (match1 is None):
-            match1=re.search(regexPattern.cpuModel2,s['cpu_model'])
-        if not (match1 is None):
-            ms1=match1.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
-        else:
-            ms1=''
-    if not pd.isna(s['title']) :
-        match2 = re.search(regexPattern.cpuModel3,s['title'])
-        if (match2 is None):
-            match2=re.search(regexPattern.cpuModel2,s['title'])
-        if not (match2 is None):
-            ms2=match2.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
-        else:
-            ms2=''
-    if not pd.isna(s['cpu_brand']) :
-        match3 = re.search(regexPattern.cpuModel,s['cpu_brand'])
-        if (match3 is None):
-            match3=re.search(regexPattern.cpuModel2,s['cpu_brand'])
-        if not (match3 is None):
-            ms3=match3.group().replace(' ( 3rd gen )','').replace(' ( 2nd gen )','').replace(' ( 4th gen )','')
-        else:
-            ms3=''
-    match=max([ms1,ms2,ms3],key=len)
-    return match.replace('-',' ')
-                  
+    for col in ('cpu_brand', 'cpu_model', 'title'):
+        if not pd.isna(s[col]):
+            match = re.search(regexPattern.cpuModel[s['x_cpu_brand']], s[col])
+            if match:
+                if s['x_cpu_brand'] in ('intel celeron', 'intel pentium'):
+                    return match.group(0)
+                elif s['x_cpu_brand'] in ('intel core', 'amd'):
+                    return f'{match.group(1)}-{match.group(2)}'
+    warnings.warn(f'Unable to extract CPU model for "{s["title"]}".')
+    return None
+
 def cpuFrequency(s: pd.core.series.Series) -> float:
     #单位GHz
     if not pd.isna(s['cpu_frequency']):
@@ -114,7 +100,9 @@ def cpuFrequency(s: pd.core.series.Series) -> float:
         if not (match is None):
             fre_unit = match.group(3)
             fre = float(match.group(1))
-            if fre_unit == 'mhz':
+            if fre == 0:
+                return None
+            elif fre_unit == 'mhz':
                 fre /= 1000
             return fre
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')

@@ -17,13 +17,21 @@ weight = re.compile(r'\b([0-9]*\.?[0-9]+) ?((?:kg|pounds|lbs))\b')
 
 disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
 
-cpuBrand = re.compile(r'(intel|amd|core)(\s[a-z]+\s(a|i)[0-9]|\s[a-z]+[0-9]|\s(e|a)(-|\s)([0-9]+|[a-z]+)|\s[a-z]+|)')
+cpuBrand = {k: re.compile(v) for k, v in {
+    'intel core': r'\b(?:intel\.?|core) i[3579]\b',
+    'intel pentium': r'\bpentium\b',
+    'intel celeron': r'\bceleron\b',
+    'amd': r'\bamd\b',
+}.items()}
 
-cpuModel = re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s|)([0-9]+|)(u|m|lm|)')
-
-cpuModel2 = re.compile(r'(intel pentium|intel celeron)(\s[0-9]+|)(u|m|)')
-
-cpuModel3 = re.compile(r'(i|a|n)([0-9])(\s\(.+?\)\s|-|\s)([0-9]+)(u|m|lm|)')
+cpuModel = {k: re.compile(v) for k, v in {
+    'intel core': r'\b(i[3579])[ -](\d{3,5}[a-z]{0,2})\b',
+    'intel pentium': r'\b(?:\d{4}[a-z]|n\d{4})\b',
+    'intel celeron': r'\b\d{4}[a-z]\b',
+    # 参见 https://zh.wikipedia.org/zh-cn/AMD加速处理器列表
+    # [^-a-z\d]+是为了不与某种格式的笔记本型号混淆……
+    'amd': r'\b([ae](?:[12468]|10|12)|e)[ -](\d{3,4}[a-z]{0,2})[^-a-z\d]+\b',
+}.items()}
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
