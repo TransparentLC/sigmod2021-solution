@@ -35,9 +35,9 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
             return False
     
     if (not pd.isna(seriesA['ram_capacity'])) and (not pd.isna(seriesB['ram_capacity'])):
-    if (not pd.isna(seriesA['x_ram_capacity'])) and (not pd.isna(seriesB['x_ram_capacity'])):
-        if seriesA['x_ram_capacity']!=seriesB['x_ram_capacity']:
-            if (str(int(seriesA['x_ram_capacity'])) not in seriesB['ram_capacity']) or (str(int(seriesB['x_ram_capacity'])) not in seriesA['ram_capacity']):
-                return False
+        if (not pd.isna(seriesA['x_ram_capacity'])) and (not pd.isna(seriesB['x_ram_capacity'])):
+            if seriesA['x_ram_capacity']!=seriesB['x_ram_capacity']:
+                if (seriesA['x_ram_capacity'] not in seriesB['ram_capacity']) and (seriesB['x_ram_capacity'] not in seriesA['ram_capacity']):
+                    return False
 
     return True
