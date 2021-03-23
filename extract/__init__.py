@@ -94,7 +94,7 @@ def cpuModel(s: pd.core.series.Series) -> str:
     return None
 
 def cpuFrequency(s: pd.core.series.Series) -> float:
-    #单位GHz
+    # 单位GHz
     if not pd.isna(s['cpu_frequency']):
         match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
         if not (match is None):
@@ -109,7 +109,7 @@ def cpuFrequency(s: pd.core.series.Series) -> float:
     return None
                       
 def ramCapacity(s: pd.core.series.Series) -> float:
-    #单位GB
+    # 单位GB
     if not pd.isna(s['ram_capacity']) :
         match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
         if not (match is None):
@@ -120,7 +120,7 @@ def ramCapacity(s: pd.core.series.Series) -> float:
                 cap /= 1024
             # 修正0GB的情况
             if cap:
-                return f'{str(int(cap))} {cap_unit}'
+                return cap
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 

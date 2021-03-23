@@ -35,7 +35,7 @@ cpuModel = {k: re.compile(v) for k, v in {
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
-ramCapacity = re.compile(r'([0-9]+)(\s|)(gb|mb)')
+ramCapacity = re.compile(r'(?<!max ram supported)(?: (\d+))(\s|)(gb|mb)')
 
 ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
 
