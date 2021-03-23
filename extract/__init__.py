@@ -120,7 +120,7 @@ def ramCapacity(s: pd.core.series.Series) -> float:
                 cap /= 1024
             # 修正0GB的情况
             if cap:
-                return cap
+                return f'{str(int(cap))} {cap_unit}'
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
