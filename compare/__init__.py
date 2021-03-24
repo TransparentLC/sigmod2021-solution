@@ -7,6 +7,8 @@ equalNotebookModelGroups = (
     set(('x130 2338', 'x130 2339')),
     set(('x130 0622', 'x130 0627')),
     set(('x230 2320', 'x230 3435')),
+    set(('v7-482', 'v7-582')),
+    set(('i5547-3751slv', 'i5547-3753slv')),
 )
 
 def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
@@ -18,19 +20,6 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     # )):
     #     return False
 
-    # cA,cB='',''
-    # if pd.isna(seriesA['x_cpu_model']):
-    #     cA = seriesA['x_cpu_brand']
-    # else:
-    #     cA = seriesA['x_cpu_model']
-    #
-    # if pd.isna(seriesB['x_cpu_model']):
-    #     cB = seriesB['x_cpu_brand']
-    # else:
-    #     cB=seriesB['x_cpu_model']
-    # if cA!=cB:
-    #     return False
-    
     if (not pd.isna(seriesA['x_ram_type'])) and (not pd.isna(seriesB['x_ram_type'])):
         if (seriesA['x_ram_type'] not in seriesB['x_ram_type']) and (seriesB['x_ram_type'] not in seriesA['x_ram_type']):
             return False
