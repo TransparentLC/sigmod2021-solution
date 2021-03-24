@@ -18,6 +18,12 @@ def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str
 # 实际上要彻底破坏传递性的话，相当于在无向图中循环查找并删除所有A到B的路径
 # 但是这里先考虑路径长度为2的情况
 # 参数c就是上面的C了，通过df.apply调用时可以提供
+
+# modelDict是根据instance_id查找x_model用的
+# 如果型号相同就不删除路径吗？也就是加上if not compare.notebookModelEqual(...)的判断
+# 仍然删除：自测F值0.99 ↑ 上传F值0.911 ↓ (commit 0ffff35)
+# 不删除了：自测F值0.95 ↓ 上传F值0.919 ↑ (commit 5008bb7)
+# 有别的修改的时候可以顺便改一改这里试试看……
 def removeTransitivity(
     c: str,
     matchPairs: typing.Set[typing.Tuple[str, str]],
