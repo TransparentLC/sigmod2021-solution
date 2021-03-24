@@ -11,8 +11,18 @@ equalNotebookModelGroups = (
     set(('i5547-3751slv', 'i5547-3753slv')),
 )
 
+def notebookModelEqual(modelA: str, modelB: str) -> bool:
+    return any((
+        modelA in g and modelB in g
+        for g in equalNotebookModelGroups
+    )) or modelA == modelB
+
 def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
+    # if seriesA['instance_id'] == '' and seriesB['instance_id'] == '':
+    #     print('debug')
+
     # 考虑到单位换算和误差，重量有0.2kg之内的误差都是可以接受的
+    # 这个还是不靠谱啊……
     # if all((
     #     not pd.isna(seriesA['x_weight']),
     #     not pd.isna(seriesB['x_weight']),
@@ -27,11 +37,7 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     if all((
         not pd.isna(seriesA['x_model']),
         not pd.isna(seriesB['x_model']),
-        not any((
-            seriesA['x_model'] in g and seriesB['x_model'] in g
-            for g in equalNotebookModelGroups
-        )),
-        seriesA['x_model'] != seriesB['x_model'],
+        not notebookModelEqual(seriesA['x_model'], seriesB['x_model']),
     )):
         return False
 
