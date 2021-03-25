@@ -121,12 +121,22 @@ def ramCapacity(s: pd.core.series.Series) -> float:
             # 修正0GB的情况
             if cap:
                 return cap
+    #尝试从标题获取
+    if not pd.isna(s['title']) :
+        match = re.search(regexPattern.ramCapacityTitle,s['title'])
+        if not (match is None):
+            return match.group(1)
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
 def ramType(s: pd.core.series.Series) -> str:
     if not pd.isna(s['ram_type']) :
         match = re.search(regexPattern.ramType,s['ram_type'])
+        if not (match is None):
+            return match.group()
+    #尝试从标题获取
+    if not pd.isna(s['title']) :
+        match = re.search(regexPattern.ramType,s['title'])
         if not (match is None):
             return match.group()
     warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')

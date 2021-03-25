@@ -35,9 +35,17 @@ cpuModel = {k: re.compile(v) for k, v in {
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
-ramCapacity = re.compile(r'(?<!max ram supported)(?: (\d+))(\s|)(gb|mb)')
+# ramCapacity = re.compile(r'(?<!max ram supported)(?: (\d+))(\s|)(gb|mb)')
 
-ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
+ramCapacity = re.compile(r'(?<!max ram supported )(\d+)(\s|)(gb|mb)')
+
+#用于匹配标题
+ramCapacityTitle = re.compile(r'(\d+)(\s|)(gb|mb)(\s|)(ddr|ram|memory)')
+
+# ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
+
+#去掉so-dimm
+ramType = re.compile(r'\b(?:ddr\dl?)\b') 
 
 winType = re.compile(r'\b(?:windows|win) ([0-9]*\.?[0-9]+|xp) ?((?:professional|pro|home premium|home)?)\b')
 
