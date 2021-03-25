@@ -125,7 +125,7 @@ def ramCapacity(s: pd.core.series.Series) -> float:
     if not pd.isna(s['title']) :
         match = re.search(regexPattern.ramCapacityTitle,s['title'])
         if not (match is None):
-            return match.group(1)
+            return float(match.group(1))
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
