@@ -143,19 +143,21 @@ def ramType(s: pd.core.series.Series) -> str:
     return None
 
 def winType(s: pd.core.series.Series) -> typing.Optional[str]:
-    if not pd.isna(s['title']) :
-        match = re.search(regexPattern.winType, s['title'])
-        if not (match is None):
-            winVer = match.group(1)
-            winType = match.group(2)
-            if winType:
-                if winType == 'professional':
-                    winType = 'pro'
-                elif winType == 'home premium':
-                    winType = 'home'
-                return f'{winVer} {winType}'
-            else:
-                return winVer
+    # 为什么会有些数据把操作系统的信息写在ram_capacity里面……啊！
+    for col in ('title', 'ram_capacity'):
+        if not pd.isna(s[col]) :
+            match = re.search(regexPattern.winType, s[col])
+            if not (match is None):
+                winVer = match.group(1)
+                winType = match.group(2)
+                if winType:
+                    if winType == 'professional':
+                        winType = 'pro'
+                    elif winType == 'home premium':
+                        winType = 'home'
+                    return f'{winVer} {winType}'
+                else:
+                    return winVer
     warnings.warn(f'Unable to extract system for "{s["title"]}".')
     return None
 
