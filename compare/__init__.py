@@ -41,12 +41,25 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     )):
         return False
 
-    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency', 'x_ram_capacity'):
+    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),
             seriesA[colVeto] != seriesB[colVeto],
         )):
             return False
+
+    # 由于False Negative中出现了一些RAM为2GB/4GB的Lenovo ThinkPad X220 4090/4291
+    # 所以把这个例外加上
+    if all((
+        not pd.isna(seriesA['x_ram_capacity']),
+        not pd.isna(seriesB['x_ram_capacity']),
+        not all((
+            not pd.isna(seriesA['x_model']) and seriesA['x_model'].startswith('x220 429'),
+            not pd.isna(seriesB['x_model']) and seriesB['x_model'].startswith('x220 429'),
+        )),
+        seriesA['x_ram_capacity'] != seriesB['x_ram_capacity'],
+    )):
+        return False
 
     return True
