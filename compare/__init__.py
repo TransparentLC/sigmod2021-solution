@@ -41,7 +41,7 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     )):
         return False
 
-    for colVeto in ('x_cpu_brand', 'x_cpu_frequency'):
+    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),
@@ -59,20 +59,6 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
             not pd.isna(seriesB['x_model']) and seriesB['x_model'].startswith('x220 429'),
         )),
         seriesA['x_ram_capacity'] != seriesB['x_ram_capacity'],
-    )):
-        return False
-
-    # 由于False Negative中出现了一些使用Intel CPU的型号最后三位数不同的HP EliteBook
-    # 所以把这个例外加上
-    if all((
-        not pd.isna(seriesA['x_cpu_model']),
-        not pd.isna(seriesB['x_cpu_model']),
-        not (
-            seriesA['x_brand'] == 'hp' and not pd.isna(seriesA['x_cpu_model']) and
-            seriesB['x_brand'] == 'hp' and not pd.isna(seriesB['x_cpu_model']) and
-            seriesA['x_cpu_model'][:4] == seriesB['x_cpu_model'][:4]
-        ),
-        seriesA['x_cpu_model'] != seriesB['x_cpu_model'],
     )):
         return False
 
