@@ -79,6 +79,7 @@ if __name__ == '__main__':
     data['x_ram_type'] = data.apply(extract.ramType, axis=1)
     data['x_win_type'] = data.apply(extract.winType, axis=1)
     data['x_model'] = data.apply(extract.model, axis=1)
+    data['x_size'] = data.apply(extract.size, axis=1)
     _te = time.perf_counter()
     timeCounter['Extract'] = _te - _ts
 

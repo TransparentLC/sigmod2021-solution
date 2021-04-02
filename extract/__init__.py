@@ -183,3 +183,11 @@ def model(s: pd.core.series.Series) -> typing.Optional[str]:
             return m
     warnings.warn(f'Unable to extract model for "{s["title"]}".')
     return None
+
+def size(s: pd.core.series.Series) -> typing.Optional[float]:
+    match = re.search(regexPattern.size, s['title'])
+    if not (match is None):
+        m = match.group(1) # type: typing.Optional[str]
+        return round(float(m))
+    warnings.warn(f'Unable to extract size for "{s["title"]}".')
+    return None

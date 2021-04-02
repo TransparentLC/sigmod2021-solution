@@ -41,7 +41,7 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     )):
         return False
 
-    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
+    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency', 'x_size'):
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),

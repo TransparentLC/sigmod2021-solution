@@ -40,7 +40,7 @@ ramCapacity = re.compile(r'(?:(?<!max ram supported) |^)(?:(\d+))(\s|)(gb|mb)')
 #用于匹配标题
 ramCapacityTitle = re.compile(r'(\d+)(\s|)(gb|mb)(\s|)(ddr|ram|memory)')
 
-# ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-dimm))\b')
+# ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-?dimm))\b')
 
 #去掉so-dimm
 ramType = re.compile(r'\b(?:ddr\dl?)\b') 
@@ -48,6 +48,8 @@ ramType = re.compile(r'\b(?:ddr\dl?)\b')
 winType = re.compile(r'\b(?:windows|win) ([0-9]*\.?[0-9]+|xp) ?((?:professional|pro|home premium|home)?)\b')
 
 Number = re.compile(r'[a-h,j-z][0-9]+(-|\s|)([0-9]+|)')
+
+size = re.compile(r'\b(1\d(?:\.\d)?)(?:(?:-| )inch|")?(?!-)\b')
 
 # 有些品牌在X2里出现的次数太少了，所以还得自己在网上看一堆型号才行……
 # 比如这里，注意每个产品标题下面的MFR字样：
