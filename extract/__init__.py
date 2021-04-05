@@ -166,21 +166,38 @@ def model(s: pd.core.series.Series) -> typing.Optional[str]:
         match=re.search(regexPattern.model['hp2'], s['title'])
         if not (match is None):
             return match.group()
-    if not pd.isna(s['title']) and s['x_brand'] in regexPattern.model:
-        match = re.search(regexPattern.model[s['x_brand']], s['title'].replace('15-series',''))
-        if not (match is None):
-            m = match.group(1) # type: typing.Optional[str]
-            if s['x_brand'] == 'lenovo':
-                m += ' ' + match.group(2)
-            elif s['x_brand'] == 'hp':
-                # 那个正则表达式也可能误匹配到这些七个字母的词
-                if m in ('windows', 'revolve', 'hewlett', 'packard'):
-                    m = None
-                else:
-                    r = match.group(2) # type: typing.Optional[str]
-                    if r and m.endswith(r):
-                        m = m[:-len(r)]
-            return m
+    if not pd.isna(s['title']):
+        if s['x_brand'] in regexPattern.model:
+            match = re.search(regexPattern.model[s['x_brand']], s['title'].replace('15-series',''))
+            if not (match is None):
+                m = match.group(1) # type: typing.Optional[str]
+                if s['x_brand'] == 'lenovo':
+                    m += ' ' + match.group(2)
+                elif s['x_brand'] == 'hp':
+                    # 那个正则表达式也可能误匹配到这些七个字母的词
+                    if m in ('windows', 'revolve', 'hewlett', 'packard'):
+                        m = None
+                    else:
+                        r = match.group(2) # type: typing.Optional[str]
+                        if r and m.endswith(r):
+                            m = m[:-len(r)]
+                return m
+        else:
+            # 考虑brand是other的情况，尝试按照这个规则查找型号
+            # 去除各种符号
+            # 按照空格分割，去掉空字符串，长度至少为2
+            # 剩下的第一个同时有字母和数字的词，也允许有-
+            title = s['title'] # type: str
+            for char in ',.":;()&/\\':
+                title = title.replace(char, ' ')
+            titleWords = tuple(filter(lambda s: len(s) > 1, title.split(' ')))
+            for w in titleWords:
+                if (
+                    re.search(r'^[a-z\d-]+$', w) and
+                    re.search(r'[a-z]+', w) and
+                    re.search(r'\d+')
+                ):
+                    return w
     warnings.warn(f'Unable to extract model for "{s["title"]}".')
     return None
 
