@@ -182,21 +182,22 @@ def model(s: pd.core.series.Series) -> typing.Optional[str]:
                         if r and m.endswith(r):
                             m = m[:-len(r)]
                 return m
-        # 考虑brand是other或者找不到型号的情况，尝试按照这个规则查找型号
-        # 去除各种符号
-        # 按照空格分割，去掉空字符串，长度至少为2
-        # 剩下的第一个同时有字母和数字的词，也允许有-
-        title = s['title'] # type: str
-        for char in ',.":;()&/\\':
-            title = title.replace(char, ' ')
-        titleWords = tuple(filter(lambda s: len(s) > 1, title.split(' ')))
-        for w in titleWords:
-            if (
-                re.search(r'^[a-z\d-]+$', w) and
-                re.search(r'[a-z]+', w) and
-                re.search(r'\d+')
-            ):
-                return w
+        else:
+            # 考虑brand是other的情况，尝试按照这个规则查找型号
+            # 去除各种符号
+            # 按照空格分割，去掉空字符串，长度至少为2
+            # 剩下的第一个同时有字母和数字的词，也允许有-
+            title = s['title'] # type: str
+            for char in ',.":;()&/\\':
+                title = title.replace(char, ' ')
+            titleWords = tuple(filter(lambda s: len(s) > 1, title.split(' ')))
+            for w in titleWords:
+                if (
+                    re.search(r'^[a-z\d-]+$', w) and
+                    re.search(r'[a-z]+', w) and
+                    re.search(r'\d+')
+                ):
+                    return w
     warnings.warn(f'Unable to extract model for "{s["title"]}".')
     return None
 
