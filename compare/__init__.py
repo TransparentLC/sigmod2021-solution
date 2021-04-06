@@ -11,11 +11,11 @@ equalNotebookModelGroups = (
     set(('i5547-3751slv', 'i5547-3753slv')),
 )
 
-def notebookModelEqual(modelA: str, modelB: str) -> bool:
-    return any((
-        modelA in g and modelB in g
-        for g in equalNotebookModelGroups
-    )) or modelA == modelB
+def notebookGetEqualModelName(model: str) -> str:
+    for g in equalNotebookModelGroups:
+        if model in g:
+            return tuple(g)[0]
+    return model
 
 def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
     # if seriesA['instance_id'] == '' and seriesB['instance_id'] == '':
@@ -34,14 +34,7 @@ def notebook(seriesA: pd.Series, seriesB: pd.Series) -> bool:
         if (seriesA['x_ram_type'] not in seriesB['x_ram_type']) and (seriesB['x_ram_type'] not in seriesA['x_ram_type']):
             return False
 
-    if all((
-        not pd.isna(seriesA['x_model']),
-        not pd.isna(seriesB['x_model']),
-        not notebookModelEqual(seriesA['x_model'], seriesB['x_model']),
-    )):
-        return False
-
-    for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency', 'x_size'):
+    for colVeto in ('x_model', 'x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
         if all((
             not pd.isna(seriesA[colVeto]),
             not pd.isna(seriesB[colVeto]),
