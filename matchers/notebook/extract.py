@@ -1,7 +1,8 @@
 import pandas as pd
+import re
 import typing
 import warnings
-from .regexPattern import *
+from . import regexPattern
 
 customNotebookFeatures = (
     'x_brand',
@@ -95,7 +96,7 @@ def cpuBrand(s: pd.core.series.Series) -> str:
                     return k
     warnings.warn(f'Unable to extract CPU brand for "{s["title"]}".')
     return None
-   
+
 def cpuModel(s: pd.core.series.Series) -> str:
     for col in ('cpu_brand', 'cpu_model', 'title'):
         if not pd.isna(s[col]):
@@ -122,7 +123,7 @@ def cpuFrequency(s: pd.core.series.Series) -> float:
             return fre
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
-                      
+
 def ramCapacity(s: pd.core.series.Series) -> float:
     # 单位GB
     if not pd.isna(s['ram_capacity']) :
