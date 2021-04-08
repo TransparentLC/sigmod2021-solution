@@ -2,17 +2,16 @@ import pandas as pd
 
 # 以下每一组内的笔记本型号可以当成同一个
 # 这是翻了一大堆False Negative记录之后得出的结论
-equalNotebookModelGroups = (
-    set(('x220 4287', 'x220 4290', 'x220 4291')),
-    set(('x130 2338', 'x130 2339')),
-    set(('x130 0622', 'x130 0627')),
-    set(('x230 2320', 'x230 3435')),
-    set(('v7-482', 'v7-582')),
-    set(('i5547-3751slv', 'i5547-3753slv')),
-)
 
 def notebookGetEqualModelName(model: str) -> str:
-    for g in equalNotebookModelGroups:
+    for g in (
+        set(('x220 4287', 'x220 4290', 'x220 4291')),
+        set(('x130 2338', 'x130 2339')),
+        set(('x130 0622', 'x130 0627')),
+        set(('x230 2320', 'x230 3435')),
+        set(('v7-482', 'v7-582')),
+        set(('i5547-3751slv', 'i5547-3753slv')),
+    ):
         if model in g:
             return tuple(g)[0]
     return model

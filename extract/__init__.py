@@ -3,6 +3,21 @@ import typing
 import warnings
 from .regexPattern import *
 
+customNotebookFeatures = (
+    'x_brand',
+    'x_weight',
+    'x_hdd_capacity',
+    'x_ssd_capacity',
+    'x_cpu_brand',
+    'x_cpu_model',
+    'x_cpu_frequency',
+    'x_ram_capacity',
+    'x_ram_type',
+    'x_win_type',
+    'x_model',
+    'x_size',
+)
+
 def brand(s: pd.core.series.Series) -> str:
     for k, r in regexPattern.brand.items(): # type: str, re.Pattern
         if (not pd.isna(s['brand']) and r.search(s['brand'])) or r.search(s['title']):

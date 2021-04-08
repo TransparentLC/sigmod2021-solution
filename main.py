@@ -4,6 +4,17 @@ import pandas as pd
 import time
 import typing
 
+class Cluster():
+    def __init__(self, feature: typing.Iterable[str]):
+        self.featureSeries = pd.Series((None for i in feature), feature)
+        self.instance = set()
+
+    def mergeInstanceSeries(self, instanceSeries: pd.Series):
+        self.instance.add(instanceSeries['instance_id'])
+        for k in self.featureSeries.keys():
+            if pd.isna(self.featureSeries[k]) and not pd.isna(instanceSeries[k]):
+                self.featureSeries[k] = instanceSeries[k]
+
 # 只是为了保证每一组match中两个id的顺序
 def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str]:
     if instanceIdA >= instanceIdB:
@@ -20,7 +31,7 @@ def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str
 # 参数c就是上面的C了，通过df.apply调用时可以提供
 
 # modelDict是根据instance_id查找x_model用的
-# 如果型号相同就不删除路径吗？也就是加上if not compare.notebookModelEqual(...)的判断
+# 如果型号相同就不删除路径吗？
 # 仍然删除：自测F值0.99 ↑ 上传F值0.911 ↓ (commit 0ffff35)
 # 不删除了：自测F值0.95 ↓ 上传F值0.919 ↑ (commit 5008bb7)
 # 有别的修改的时候可以顺便改一改这里试试看……
@@ -35,19 +46,19 @@ def removeTransitivity(
         aModel = modelDict[a]
         bModel = modelDict[b]
         if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
-            if not compare.notebookModelEqual(aModel, cModel):
+            if aModel != cModel:
                 matchPairs.remove((a, c))
-            if not compare.notebookModelEqual(bModel, cModel):
+            if bModel != cModel:
                 matchPairs.remove((b, c))
         elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
-            if not compare.notebookModelEqual(aModel, cModel):
+            if aModel != cModel:
                 matchPairs.remove((a, c))
-            if not compare.notebookModelEqual(cModel, bModel):
+            if cModel != bModel:
                 matchPairs.remove((c, b))
         elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
-            if not compare.notebookModelEqual(cModel, aModel):
+            if cModel != aModel:
                 matchPairs.remove((c, a))
-            if not compare.notebookModelEqual(cModel, bModel):
+            if cModel != bModel:
                 matchPairs.remove((c, b))
 
 if __name__ == '__main__':
@@ -96,6 +107,54 @@ if __name__ == '__main__':
     # 以品牌分组，在每个组里两两比较
     for brand, brandGroup in data.groupby('x_brand'): # type: str, pd.DataFrame
         print(f'Matching in group "{brand}"...')
+        # 按照型号进行聚类
+        # modelCluster = {
+        #     'model-1': [
+        #         {
+        #             'feature': pd.Series with x_* cols,
+        #             'instance': set(('instance-1', 'instance-2', ...))
+        #         },
+        #         ...
+        #     ],
+        #     'model-2': ...
+        # }
+
+        # modelCluster = dict() # type: dict[str, list[Cluster]]
+        # for index, series in brandGroup.iterrows(): # type: int, pd.Series
+        #     if series['x_model'] not in modelCluster:
+        #         modelCluster[series['x_model']] = []
+        #     merged = False
+        #     for cluster in modelCluster[series['x_model']]:
+        #         if compare.notebook(series, cluster.featureSeries):
+        #             merged = True
+        #             cluster.mergeInstanceSeries(series)
+        #             break
+        #     if not merged:
+        #         newCluster = Cluster(extract.customNotebookFeatures)
+        #         newCluster.mergeInstanceSeries(series)
+        #         modelCluster[series['x_model']].append(newCluster)
+
+        # 尝试合并某些cluster
+        # mergedCluster = [] # type: list[Cluster]
+        # for k, v in modelCluster.items(): # type: str, list[Cluster]
+        #     for cluster in v:
+        #         merged = False
+        #         for c in mergedCluster:
+        #             if compare.notebook(c.featureSeries, cluster.featureSeries):
+        #                 merged = True
+        #                 c.instance.update(cluster.instance)
+        #                 break
+        #         if not merged:
+        #             mergedCluster.append(cluster)
+
+        # 把每个cluster的结果写入output
+        # for cluster in mergedCluster:
+        #     instances = tuple(cluster.instance)
+        #     for i in range(len(instances)):
+        #         for j in range(len(instances)):
+        #             if i > j:
+        #                 output.append((instances[i], instances[j]))
+
         matchPairs = set() # type: set[tuple[str, str]]
         notMatchPairs = set() # type: set[tuple[str, str]]
         brandGroup.apply(
