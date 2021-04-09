@@ -91,7 +91,8 @@ class matcher(AbstractMatcher):
     def extract(df: pd.DataFrame) -> None:
         # 将所有数据转为小写
         for col in df.columns:
-            df[col] = df[col].str.lower()
+            if col != 'instance_id':
+                df[col] = df[col].str.lower()
         # 通过正则表达式解析信息
         df['x_brand'] = df.apply(extract.brand, axis=1)
         df['x_weight'] = df.apply(extract.weight, axis=1)

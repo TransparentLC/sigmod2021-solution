@@ -1,6 +1,6 @@
 import matchers
+import matchers.altosight
 import matchers.notebook
-import matchers.usbstick
 import pandas as pd
 import os
 import typing
@@ -30,8 +30,8 @@ if __name__ == '__main__':
         # 获取可用的matcher
         matcher = None # type: matchers.AbstractMatcher
         for matcherName in (
+            'altosight',
             'notebook',
-            'usbstick',
         ):
             m = getattr(matchers, matcherName).matcher # type: matchers.AbstractMatcher
             if m.check(data):
