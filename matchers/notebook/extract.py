@@ -19,14 +19,14 @@ customNotebookFeatures = (
     'x_size',
 )
 
-def brand(s: pd.core.series.Series) -> str:
+def brand(s: pd.Series) -> str:
     for k, r in regexPattern.brand.items(): # type: str, re.Pattern
         if (not pd.isna(s['brand']) and r.search(s['brand'])) or r.search(s['title']):
             return k
     warnings.warn(f'Unable to extract brand for "{s["title"]}".')
     return 'other'
 
-def weight(s: pd.core.series.Series) -> typing.Optional[float]:
+def weight(s: pd.Series) -> typing.Optional[float]:
     matches = regexPattern.weight.findall(s['title'] if pd.isna(s['weight']) else s['weight']) # type: list[tuple[str, str]]
     if len(matches) == 0:
         # 找不到的话就是真的没有数据了
@@ -45,7 +45,7 @@ def weight(s: pd.core.series.Series) -> typing.Optional[float]:
                     break
             return value
 
-def diskCapacity(s: pd.core.series.Series) -> pd.Series:
+def diskCapacity(s: pd.Series) -> pd.Series:
     # 同时返回HDD和SSD的大小，以GB为单位
     hdd = 0
     ssd = 0
@@ -87,7 +87,7 @@ def diskCapacity(s: pd.core.series.Series) -> pd.Series:
             ssd = 0
     return pd.Series((hdd, ssd))
 
-def cpuBrand(s: pd.core.series.Series) -> str:
+def cpuBrand(s: pd.Series) -> str:
     for col in ('cpu_brand', 'cpu_model', 'title'):
         if not pd.isna(s[col]):
             for k, r in regexPattern.cpuBrand.items(): # type: str, re.Pattern
@@ -97,19 +97,20 @@ def cpuBrand(s: pd.core.series.Series) -> str:
     warnings.warn(f'Unable to extract CPU brand for "{s["title"]}".')
     return None
 
-def cpuModel(s: pd.core.series.Series) -> str:
-    for col in ('cpu_brand', 'cpu_model', 'title'):
-        if not pd.isna(s[col]):
-            match = re.search(regexPattern.cpuModel[s['x_cpu_brand']], s[col])
-            if match:
-                if s['x_cpu_brand'] in ('intel celeron', 'intel pentium'):
-                    return match.group(0)
-                elif s['x_cpu_brand'] in ('intel core', 'amd'):
-                    return f'{match.group(1)}-{match.group(2)}'
+def cpuModel(s: pd.Series) -> str:
+    if not pd.isna(s['x_cpu_brand']):
+        for col in ('cpu_brand', 'cpu_model', 'title'):
+            if not pd.isna(s[col]):
+                match = re.search(regexPattern.cpuModel[s['x_cpu_brand']], s[col])
+                if match:
+                    if s['x_cpu_brand'] in ('intel celeron', 'intel pentium'):
+                        return match.group(0)
+                    elif s['x_cpu_brand'] in ('intel core', 'amd'):
+                        return f'{match.group(1)}-{match.group(2)}'
     warnings.warn(f'Unable to extract CPU model for "{s["title"]}".')
     return None
 
-def cpuFrequency(s: pd.core.series.Series) -> float:
+def cpuFrequency(s: pd.Series) -> float:
     # 单位GHz
     if not pd.isna(s['cpu_frequency']):
         match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
@@ -124,7 +125,7 @@ def cpuFrequency(s: pd.core.series.Series) -> float:
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
 
-def ramCapacity(s: pd.core.series.Series) -> float:
+def ramCapacity(s: pd.Series) -> float:
     # 单位GB
     if not pd.isna(s['ram_capacity']) :
         match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
@@ -145,7 +146,7 @@ def ramCapacity(s: pd.core.series.Series) -> float:
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
-def ramType(s: pd.core.series.Series) -> str:
+def ramType(s: pd.Series) -> str:
     if not pd.isna(s['ram_type']) :
         match = re.search(regexPattern.ramType,s['ram_type'])
         if not (match is None):
@@ -158,7 +159,7 @@ def ramType(s: pd.core.series.Series) -> str:
     warnings.warn(f'Unable to extract RAM type for "{s["title"]}".')
     return None
 
-def winType(s: pd.core.series.Series) -> typing.Optional[str]:
+def winType(s: pd.Series) -> typing.Optional[str]:
     # 为什么会有些数据把操作系统的信息写在ram_capacity里面……啊！
     for col in ('title', 'ram_capacity'):
         if not pd.isna(s[col]) :
@@ -177,47 +178,48 @@ def winType(s: pd.core.series.Series) -> typing.Optional[str]:
     warnings.warn(f'Unable to extract system for "{s["title"]}".')
     return None
 
-def model(s: pd.core.series.Series) -> typing.Optional[str]:
-    if 'elitebook' in s['title']:
-        match=re.search(regexPattern.model['hp2'], s['title'])
-        if not (match is None):
-            return match.group()
+def model(s: pd.Series) -> typing.Optional[str]:
     if not pd.isna(s['title']):
         if s['x_brand'] in regexPattern.model:
-            match = re.search(regexPattern.model[s['x_brand']], s['title'].replace('15-series',''))
+            match = re.search(
+                regexPattern.model[s['x_brand']],
+                s['title']
+                    .replace('15-series','')
+                    .replace('windows', '')
+                    .replace('revolve','')
+                    .replace('hewlett','')
+                    .replace('packard', '')
+            )
             if not (match is None):
                 m = match.group(1) # type: typing.Optional[str]
-                if s['x_brand'] == 'lenovo':
+                if s['x_brand'] == 'acer':
+                    m = '-'.join(m.split(' '))
+                elif s['x_brand'] == 'lenovo':
                     m += ' ' + match.group(2)
                 elif s['x_brand'] == 'hp':
-                    # 那个正则表达式也可能误匹配到这些七个字母的词
-                    if m in ('windows', 'revolve', 'hewlett', 'packard'):
-                        m = None
-                    else:
-                        r = match.group(2) # type: typing.Optional[str]
-                        if r and m.endswith(r):
-                            m = m[:-len(r)]
+                    r = match.group(2) # type: typing.Optional[str]
+                    if r and m.endswith(r):
+                        m = m[:-len(r)]
                 return m
-        else:
-            # 考虑brand是other的情况，尝试按照这个规则查找型号
-            # 去除各种符号
-            # 按照空格分割，去掉空字符串，长度至少为2
-            # 剩下的第一个同时有字母和数字的词，也允许有-
-            title = s['title'] # type: str
-            for char in ',.":;()&/\\':
-                title = title.replace(char, ' ')
-            titleWords = tuple(filter(lambda s: len(s) > 1, title.split(' ')))
-            for w in titleWords:
-                if (
-                    re.search(r'^[a-z\d-]+$', w) and
-                    re.search(r'[a-z]+', w) and
-                    re.search(r'\d+')
-                ):
-                    return w
+        # 考虑brand是other的情况，尝试按照这个规则查找型号
+        # 去除各种符号
+        # 按照空格分割，去掉空字符串，长度至少为2
+        # 剩下的第一个同时有字母和数字的词，也允许有-
+        title = s['title'] # type: str
+        for char in ',.":;()&/\\':
+            title = title.replace(char, ' ')
+        titleWords = tuple(filter(lambda s: len(s) > 1, title.split(' ')))
+        for w in titleWords:
+            if (
+                re.search(r'^[a-z\d-]+$', w) and
+                re.search(r'[a-z]+', w) and
+                re.search(r'\d+', w)
+            ):
+                return w
     warnings.warn(f'Unable to extract model for "{s["title"]}".')
     return None
 
-def size(s: pd.core.series.Series) -> typing.Optional[float]:
+def size(s: pd.Series) -> typing.Optional[float]:
     match = re.search(regexPattern.size, s['title'])
     if not (match is None):
         m = match.group(1) # type: typing.Optional[str]

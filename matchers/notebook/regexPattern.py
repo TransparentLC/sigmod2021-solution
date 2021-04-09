@@ -9,7 +9,7 @@ brand = {k: re.compile(v) for k, v in {
     'acer': r'\bacer\b',
     'asus': r'\basus\b',
     'dell': r'\bdell\b',
-    'hp': r'\bhp\b',
+    'hp': r'\b(?:hp|hewlett[- ]packard)\b',
     'lenovo': r'\b(?:lenovo|thinkpad)\b',
 }.items()}
 
@@ -43,7 +43,7 @@ ramCapacityTitle = re.compile(r'(\d+)(\s|)(gb|mb)(\s|)(ddr|ram|memory)')
 # ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-?dimm))\b')
 
 #去掉so-dimm
-ramType = re.compile(r'\b(?:ddr\dl?)\b') 
+ramType = re.compile(r'\b(?:ddr\dl?)\b')
 
 winType = re.compile(r'\b(?:windows|win) ([0-9]*\.?[0-9]+|xp) ?((?:professional|pro|home premium|home)?)\b')
 
@@ -55,10 +55,9 @@ size = re.compile(r'\b(1\d(?:\.\d)?)(?:(?:-| )inch|")?(?!-)\b')
 # 比如这里，注意每个产品标题下面的MFR字样：
 # https://www.bhphotovideo.com/c/products/Notebooks/ci/6782/N/4110474287
 model = {k: re.compile(v) for k, v in {
-    'acer': r'(?:\b|;)([a-z]\d-\d{3})[a-z]*-[a-z\d.]+\b',
+    'acer': r'(?:\b|;)([a-z]\d[- ]\d{3})[a-z]*[- ][a-z\d.]+\b',
     'asus': r'\b([a-z]+\d+[a-z]+-[a-z]+\d+[a-z]*)\b',
     'dell': r'\b([a-z\d]{5}(?:-[a-z\d]+)?)\b',
-    'hp': r'\b((?:\d{2}[a-z]?-[a-z\d]{6})|(?:[a-z\d]{3})([a-z\d]{4}))\b',
-    'hp2':r'[0-9]+(\s|)(m|g|p)',   #elitebook
+    'hp': r'\b(?:hp)?((?:\d{2}[a-z]?-[a-z\d]{6})|(?:[a-z\d]{3})([a-z\d]{4})|\d{4}[mgpw]|\d{3} [a-z]\d|[a-z]{2}\d{4}|[a-z]\d{3}[a-z]{2})\b',
     'lenovo': r'\b(x\d{1,3})[a-z]?(?: (?:carbon|carbon touch|tablet|tablet pc|laptop))?(?: | - )(\d{4})[a-z\d]*\b',
 }.items()}

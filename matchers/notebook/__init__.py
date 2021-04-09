@@ -65,7 +65,6 @@ def removeTransitivity(
 
 class matcher(AbstractMatcher):
     @staticmethod
-    @timing('Check')
     def check(df: pd.DataFrame) -> bool:
         return all(
             col in df.columns

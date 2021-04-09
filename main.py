@@ -1,5 +1,6 @@
 import matchers
 import matchers.notebook
+import matchers.usbstick
 import pandas as pd
 import os
 import typing
@@ -20,8 +21,8 @@ if __name__ == '__main__':
 
     for datasetPath in (
         'datasets/X2.csv',
-        # 'datasets/X3.csv',
-        # 'datasets/X4.csv',
+        'datasets/X3.csv',
+        'datasets/X4.csv',
     ):
         print(f'Matching {datasetPath}')
         data = pd.read_csv(datasetPath, dtype=pd.StringDtype()) # type: pd.DataFrame
@@ -30,11 +31,12 @@ if __name__ == '__main__':
         matcher = None # type: matchers.AbstractMatcher
         for matcherName in (
             'notebook',
-            # 'usbstick',
+            'usbstick',
         ):
             m = getattr(matchers, matcherName).matcher # type: matchers.AbstractMatcher
             if m.check(data):
                 matcher = m
+                print(f'Using matcher: {matcherName}')
                 break
         if matcher is None:
             raise Exception('Failed to find a matcher')
