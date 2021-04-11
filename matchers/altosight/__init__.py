@@ -32,9 +32,34 @@ class matcher(AbstractMatcher):
 
     @staticmethod
     def compare(seriesA: pd.Series, seriesB: pd.Series) -> bool:
-        return False
+        for colVeto in (
+            'x_brand_type',
+            'x_size',
+        ):
+            if (
+                not pd.isna(seriesA[colVeto]) and
+                not pd.isna(seriesB[colVeto]) and
+                seriesA[colVeto] != seriesB[colVeto]
+            ):
+                return False
+        return True
 
     @classmethod
     @timing('Match')
     def match(cls, df: pd.DataFrame) -> typing.Iterable[typing.Tuple[str, str]]:
-        return ()
+        # 和notebook完全一致的做法
+        output = []
+        for brandType, brandTypeGroup in df.groupby('x_brand_type'):
+            print(f'Matching in group "{brandType}"...')
+            brandTypeGroup.apply(
+                lambda seriesA:
+                brandTypeGroup.apply(
+                    lambda seriesB:
+                    seriesA.name < seriesB.name and
+                    cls.compare(seriesA, seriesB) and
+                    output.append((seriesA['instance_id'], seriesB['instance_id'])),
+                    axis=1
+                ),
+                axis=1
+            )
+        return output

@@ -12,12 +12,19 @@ def type(s: pd.Series) -> str:
     warnings.warn(f'Unable to extract type for "{name}".')
     return 'other'
 
-def size(s: pd.Series) -> int:
+def size(s: pd.Series) -> float:
+    sizeRaw = None
     if not pd.isna(s['size']):
-        splitted = s['size'].split(' ') # type: list[str]
-        num = int(splitted[0])
-        unit = splitted[1]
+        sizeRaw = s['size'].split(' ') # type: list[str]
+        num = float(sizeRaw[0])
+        unit = sizeRaw[1]
+    else:
+        sizeRaw = re.search(regexPattern.size, s['name']) # type: re.Match
+        if sizeRaw:
+            num = float(sizeRaw.group(1))
+            unit = sizeRaw.group(2)
+    if sizeRaw is not None:
         if unit == 'tb':
             num *= 1024
-        return int(num)
+        return num
     return None

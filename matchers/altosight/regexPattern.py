@@ -9,3 +9,5 @@ type = {k: re.compile(v) for k, v in {
     'ssd': r'\b(?:ssd|hyperx savage)\b',
     'hdd': r'\b(?:hdd|disque|disco rigido|disque dur)\b',
 }.items()}
+
+size = re.compile(r'\b((?:\d+\.)?\d+) ?(gb|tb)(?! ?ram)\b')
