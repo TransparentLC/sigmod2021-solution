@@ -35,10 +35,10 @@ cpuModel = {k: re.compile(v) for k, v in {
 
 cpuFrequency = re.compile(r'([0-9](.|)([0-9]+|))(\s|)(ghz|mhz)')
 
-ramCapacity = re.compile(r'(?:(?<!max ram supported) |^)(?:(\d+))(\s|)(gb|mb)')
+ramCapacity = re.compile(r'(?:(?!max ram supported) |^)(?:(\d{1,2}))(\s|)(gb|mb)(?! ssd)')
 
 #用于匹配标题
-ramCapacityTitle = re.compile(r'(\d+)(\s|)(gb|mb)(\s|)(ddr|ram|memory)')
+ramCapacityTitle = re.compile(r'(?:\s|-)(\d|1\d)(\s|)(gb|mb|g|gbram)(?!\w)(\s|)(ddr|ram|memory)?')
 
 # ramType = re.compile(r'\b(?:(?:ddr\dl?)|(?:so-?dimm))\b')
 
