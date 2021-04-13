@@ -4,6 +4,17 @@ from . import extract
 from .. import AbstractMatcher
 from .. import timing
 
+class Cluster():
+    def __init__(self, feature: typing.Iterable[str]):
+        self.featureSeries = pd.Series((None for i in feature), feature)
+        self.instance = set()
+
+    def mergeInstanceSeries(self, instanceSeries: pd.Series):
+        self.instance.add(instanceSeries['instance_id'])
+        for k in self.featureSeries.keys():
+            if pd.isna(self.featureSeries[k]) and not pd.isna(instanceSeries[k]):
+                self.featureSeries[k] = instanceSeries[k]
+
 # 只是为了保证每一组match中两个id的顺序
 def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str]:
     if instanceIdA >= instanceIdB:
@@ -16,8 +27,8 @@ def getEqualModelName(model: str) -> str:
         {'x130 2338', 'x130 2339'},
         {'x130 0622', 'x130 0627'},
         {'x230 2320', 'x230 3435'},
+        {'x201 3249', 'x201 3113', 'x201 3626'},
         {'v7-482', 'v7-582'},
-        {'i5547-3751slv', 'i5547-3753slv'},
     ):
         if model in g:
             return tuple(g)[0]
@@ -125,7 +136,15 @@ class matcher(AbstractMatcher):
             if (seriesA['x_ram_type'] not in seriesB['x_ram_type']) and (seriesB['x_ram_type'] not in seriesA['x_ram_type']):
                 return False
 
-        for colVeto in ('x_model', 'x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
+        if (
+            not pd.isna(seriesA['x_model']) and
+            not pd.isna(seriesB['x_model']) and
+            seriesA['x_model'] != seriesB['x_model'] and
+            not (seriesA['x_model'] in seriesB['x_model'] or seriesB['x_model'] in seriesA['x_model'])
+        ):
+            return False
+
+        for colVeto in ('x_cpu_brand', 'x_cpu_model', 'x_cpu_frequency'):
             if (
                 not pd.isna(seriesA[colVeto]) and
                 not pd.isna(seriesB[colVeto]) and
@@ -176,7 +195,7 @@ class matcher(AbstractMatcher):
             #         modelCluster[series['x_model']] = []
             #     merged = False
             #     for cluster in modelCluster[series['x_model']]:
-            #         if compare.notebook(series, cluster.featureSeries):
+            #         if cls.compare(series, cluster.featureSeries):
             #             merged = True
             #             cluster.mergeInstanceSeries(series)
             #             break
@@ -185,20 +204,20 @@ class matcher(AbstractMatcher):
             #         newCluster.mergeInstanceSeries(series)
             #         modelCluster[series['x_model']].append(newCluster)
 
-            # 尝试合并某些cluster
+            # # 尝试合并某些cluster
             # mergedCluster = [] # type: list[Cluster]
             # for k, v in modelCluster.items(): # type: str, list[Cluster]
             #     for cluster in v:
             #         merged = False
             #         for c in mergedCluster:
-            #             if compare.notebook(c.featureSeries, cluster.featureSeries):
+            #             if cls.compare(c.featureSeries, cluster.featureSeries):
             #                 merged = True
             #                 c.instance.update(cluster.instance)
             #                 break
             #         if not merged:
             #             mergedCluster.append(cluster)
 
-            # 把每个cluster的结果写入output
+            # # 把每个cluster的结果写入output
             # for cluster in mergedCluster:
             #     instances = tuple(cluster.instance)
             #     for i in range(len(instances)):

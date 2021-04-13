@@ -40,8 +40,11 @@ def weight(s: pd.Series) -> typing.Optional[float]:
             for m in matches: # type: tuple[str, str]
                 value = float(m[0])
                 unit = m[1]
-                if unit in ('lbs', 'pounds'):
+                if unit in ('lb', 'lbs', 'pounds'):
                     value = round(float(m[0]) * .45359237, 2)
+                    break
+                elif unit == 'oz':
+                    value = round(float(m[0]) * .0283495231, 2)
                     break
             return value
 
@@ -88,7 +91,7 @@ def diskCapacity(s: pd.Series) -> pd.Series:
     return pd.Series((hdd, ssd))
 
 def cpuBrand(s: pd.Series) -> str:
-    for col in ('cpu_brand', 'cpu_model', 'cpu_type','title'):
+    for col in ('cpu_brand', 'cpu_model', 'title'):
         if not pd.isna(s[col]):
             for k, r in regexPattern.cpuBrand.items(): # type: str, re.Pattern
                 match = re.search(r, s[col])
@@ -98,50 +101,41 @@ def cpuBrand(s: pd.Series) -> str:
     return None
 
 def cpuModel(s: pd.Series) -> str:
-    #matchs=[]
     if not pd.isna(s['x_cpu_brand']):
-        for col in ('cpu_brand', 'cpu_model', 'title'):
+        for col in ('cpu_brand', 'cpu_model', 'title', 'cpu_type', 'cpu_brand'):
             if not pd.isna(s[col]):
                 match = re.search(regexPattern.cpuModel[s['x_cpu_brand']], s[col])
                 if match:
                     if s['x_cpu_brand'] in ('intel celeron', 'intel pentium'):
-                        #matchs.append(match.group(0))
                         return match.group(0)
-                    elif s['x_cpu_brand'] in ('intel core', 'amd'):
-                        if match.group(2):
-                            #matchs.append(f'{match.group(1)}-{match.group(2)}')
-                            return f'{match.group(1)}-{match.group(2)}'
-                        else:
-                            #matchs.append(match.group(1))
-                            return match.group(1)
-#    if matchs!=[]:
-#        return max(matchs,key=len)
+                    elif s['x_cpu_brand'] == 'intel core':
+                        coreType = match.group(1)
+                        coreSeries = match.group(2)
+                        # 某一行把i7 640m打成了i7 m640
+                        if coreSeries[0].isalpha():
+                            coreSeries = coreSeries[1:] + coreSeries[0]
+                        # 修正一些写错的型号
+                        if coreSeries in ('720q', '820q', '640'):
+                            coreSeries += 'm'
+                        return f'{coreType}-{coreSeries}'
+                    elif s['x_cpu_brand'] == 'amd':
+                        return f'{match.group(1)}-{match.group(2)}'
     warnings.warn(f'Unable to extract CPU model for "{s["title"]}".')
     return None
 
 def cpuFrequency(s: pd.Series) -> float:
     # 单位GHz
-    if not pd.isna(s['cpu_frequency']):
-        match = re.search(regexPattern.cpuFrequency, s['cpu_frequency'])
-        if not (match is None):
-            fre_unit = match.group(3)
-            fre = float(match.group(1).replace(' ','.'))
-            if fre == 0:
-                return None
-            elif fre_unit == 'mhz':
-                fre /= 1000
-            return fre
-
-    if not pd.isna(s['title']) :
-        match = re.search(regexPattern.cpuFrequency,s['title'])
-        if not (match is None):
-            fre_unit = match.group(3)
-            fre = float(match.group(1).replace(' ','.'))
-            if fre == 0:
-                return None
-            elif fre_unit == 'mhz':
-                fre /= 1000
-            return fre
+    for col in ('cpu_frequency', 'title'):
+        if not pd.isna(s[col]):
+            match = re.search(regexPattern.cpuFrequency, s[col])
+            if not (match is None):
+                fre_unit = match.group(2)
+                fre = float(match.group(1).replace(' ', '.'))
+                if fre == 0:
+                    return None
+                elif fre_unit == 'mhz' and fre >= 1000:
+                    fre /= 1000
+                return fre
     warnings.warn(f'Unable to extract CPU frequency for "{s["title"]}".')
     return None
 
@@ -150,12 +144,30 @@ def ramCapacity(s: pd.Series) -> float:
     if not pd.isna(s['ram_capacity']) :
         match = re.search(regexPattern.ramCapacity, s['ram_capacity'])
         if not (match is None):
-            return float(match.group(1))
-    #尝试从标题获取
+            cap_unit = match.group(2)
+            cap = float(match.group(1))
+            # 修正某个把4GB打成4MB的情况
+            if cap_unit == 'mb' and cap >= 1024:
+                cap /= 1024
+            # 修正0GB的情况
+            if cap:
+                return cap
+    # 尝试从标题获取
     if not pd.isna(s['title']) :
-        match = re.search(regexPattern.ramCapacity,s['title'])
+        match = re.search(regexPattern.ramCapacityTitle, s['title'])
         if not (match is None):
-            return float(match.group(1))
+            cap_unit = match.group(2)
+            cap = float(match.group(1))
+            # 修正某个把4GB打成4MB的情况
+            if cap_unit == 'mb' and cap >= 1024:
+                cap /= 1024
+            # 修正0GB的情况
+            if cap:
+                return cap
+    # 如果还找不到就从标题的*gb中找到数值最小的一个
+    # possibleGbs = tuple(float(x) for x in re.findall(r' (\d{1,2})gb? ', s['title']))
+    # if possibleGbs:
+    #     return min(possibleGbs)
     warnings.warn(f'Unable to extract RAM capacity for "{s["title"]}".')
     return None
 
@@ -194,23 +206,28 @@ def winType(s: pd.Series) -> typing.Optional[str]:
 def model(s: pd.Series) -> typing.Optional[str]:
     if not pd.isna(s['title']):
         if s['x_brand'] in regexPattern.model:
-            tit=s['title'].replace('15-series','').replace('windows', '').replace('revolve','').replace('hewlett','').replace('packard', '')
-            if not pd.isna(s['x_cpu_model']):
-                if 'i' in s['x_cpu_model'] and len(s['x_cpu_model'])>3:
-                        tit=tit.replace(s['x_cpu_model'][3:],'')
             match = re.search(
-                        regexPattern.model[s['x_brand']],tit)
+                regexPattern.model[s['x_brand']],
+                s['title'].replace('15-series','')
+            )
             if not (match is None):
                 m = match.group(1) # type: typing.Optional[str]
                 if s['x_brand'] == 'acer':
+                    if not m and match.group(2):
+                        m = match.group(2)
                     m = '-'.join(m.split(' '))
+                elif s['x_brand'] == 'dell':
+                    if m.startswith('i'):
+                        m = m[1:]
                 elif s['x_brand'] == 'lenovo':
                     m += ' ' + match.group(2)
                 elif s['x_brand'] == 'hp':
                     r = match.group(2) # type: typing.Optional[str]
                     if r and m.endswith(r):
                         m = m[:-len(r)]
-                return m
+                    m = ' '.join(m.split('-'))
+                if m:
+                    return m
         # 考虑brand是other的情况，尝试按照这个规则查找型号
         # 去除各种符号
         # 按照空格分割，去掉空字符串，长度至少为2

@@ -20,8 +20,8 @@ def getEqualModelName(model: str) -> str:
         {'x130 2338', 'x130 2339'},
         {'x130 0622', 'x130 0627'},
         {'x230 2320', 'x230 3435'},
+        {'x201 3249', 'x201 3113', 'x201 3626'},
         {'v7-482', 'v7-582'},
-        {'i5547-3751slv', 'i5547-3753slv'},
     ):
         if model in g:
             return tuple(g)[0]
@@ -48,8 +48,9 @@ class matcher(AbstractMatcher):
                 'dimensions',
                 'title',
             )
+        # ):
         ) and df.iloc[1].at['instance_id'].startswith('source'):  #匹配X3,它的id是以source开头的
-                return True
+            return True
         return False
 
     @staticmethod
@@ -71,39 +72,39 @@ class matcher(AbstractMatcher):
         df['x_model'] = df.apply(extract.model, axis=1)
         df['x_model'] = df['x_model'].apply(getEqualModelName)
         df['x_size'] = df.apply(extract.size, axis=1)
-    
+
     @staticmethod
     @timing('MatchBrand')
     def MatchBrand(df: pd.DataFrame):
         brands,pds_with_bds, pds_without_bds=['other'],{},{}
         '''
         pds_with_bds={brand1:{id1:{description},id2:{description},...},...}
-        
+
         '''
-        
+
         for i in range(df.shape[0]):
             nk=df.iloc[i]
             if(not pd.isna(nk['x_brand'])):
                 if nk['x_brand'] not in brands:
                     brands.append(nk['x_brand'])
-                
+
                 if nk['x_brand'] not in pds_with_bds.keys():
                     pds_with_bds[nk['x_brand']]=dict()
-                
+
                 pds_with_bds[nk['x_brand']][nk['instance_id']]=dict()
                 #描述属性暂时只保留这6个
                 for pkey in ['x_ram_type','x_model','x_cpu_brand','x_cpu_model','x_cpu_frequency','x_ram_capacity']:
                     if not pd.isna(nk[pkey]):
                         pds_with_bds[nk['x_brand']][nk['instance_id']][pkey]=nk[pkey]
-            
+
             else:
                 pds_without_bds[nk['instance_id']]=dict()
                 for pkey in ['x_ram_type','x_model','x_cpu_brand','x_cpu_model','x_cpu_frequency','x_ram_capacity']:
                     if not pd.isna(nk[pkey]):
                         pds_without_bds[nk['instance_id']][pkey]=nk[pkey]
-        
+
         return (brands,pds_with_bds, pds_without_bds)
-    
+
     def Transfer(tokens, k):
         result = []
         if tokens:
@@ -113,9 +114,9 @@ class matcher(AbstractMatcher):
                     i = list(i)
                     result.append(tuple(i))
         return result
-    
+
     @classmethod
-    @timing('BlockScheme')  
+    @timing('BlockScheme')
     def Block_Scheme(cls,dataset, tokenizer, transfer):
         """
             input:  dataset ;
@@ -129,20 +130,20 @@ class matcher(AbstractMatcher):
                 dict_d = dict(profile)
                 description = list(dict_d.values())
                 temblocks = cls.Transfer(description, transfer)
-    
+
                 for block in temblocks:
                     if block not in blocks:
                         blocks[block] = [product_id]
                     else:
                         blocks[block].append(product_id)
-    
+
         new_blocks = {}
         for k in list(blocks.keys()):
             if len(blocks[k]) >= 2:
                 new_blocks[k] = ','.join(sorted(blocks[k]))
         del blocks
         return new_blocks
-    
+
     def IDEqual(df,seriesA,seriesB):
         #有些Other Laptops & Notebooks，可以直接判断title里的id
         t1=df.iloc[seriesA].at['title']
@@ -154,42 +155,42 @@ class matcher(AbstractMatcher):
                 if id1.group()!=id2.group():
                     return False
         return True
-    
+
     @classmethod
-    @timing('Match')              
+    @timing('Match')
     def match(cls, df: pd.DataFrame) -> typing.Iterable[typing.Tuple[str, str]]:
-        
+
         # match the brand
         brands, pds_with_bds, pds_without_bds = cls.MatchBrand(df)
         pds_with_bds['unknown'] = pds_without_bds
-        
+
         # process each brand class
         results = []
         for brand in tqdm(sorted(list(pds_with_bds.keys()))):
             product = pds_with_bds[brand]
-            
+
             if len(product.keys()) < 2:
                 continue
-    
-            # block scheme 
+
+            # block scheme
             blocks = cls.Block_Scheme(product, 'mw', 1)  #k可变
-            
+
             # clustering
             product_set,unpsb = cluster.Clustering(product, blocks)  #unpsb保存不相等的id pairs
-            
+
             # add record
             for clus in product_set.values():
                 if len(clus) < 2:
                     continue
                 for pair in itertools.combinations(clus, 2):
                     id_a, id_b = pair
-                    
+
                     if not cls.IDEqual(df,df[df['instance_id']==id_a].index.tolist()[0],df[df['instance_id']==id_b].index.tolist()[0]):
                         unpsb.add((id_a,id_b))
                         continue
-                        
+
                     if (id_a,id_b) in unpsb:
                         continue
-                    
+
                     results.append((id_a, id_b))
         return results

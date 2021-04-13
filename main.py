@@ -6,17 +6,6 @@ import pandas as pd
 import os
 import typing
 
-class Cluster():
-    def __init__(self, feature: typing.Iterable[str]):
-        self.featureSeries = pd.Series((None for i in feature), feature)
-        self.instance = set()
-
-    def mergeInstanceSeries(self, instanceSeries: pd.Series):
-        self.instance.add(instanceSeries['instance_id'])
-        for k in self.featureSeries.keys():
-            if pd.isna(self.featureSeries[k]) and not pd.isna(instanceSeries[k]):
-                self.featureSeries[k] = instanceSeries[k]
-
 if __name__ == '__main__':
     output = [] # type: list[tuple[str, str]]
 
