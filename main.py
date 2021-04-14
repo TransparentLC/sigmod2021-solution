@@ -4,16 +4,22 @@ import matchers.notebook
 import matchers.notebook2
 import pandas as pd
 import os
+import sys
 import typing
 
 if __name__ == '__main__':
+    datasetPaths = (
+        'datasets/X2.csv',
+        'datasets/X3.csv',
+        'datasets/X4.csv',
+    ) if '--submission' in sys.argv else (
+        # 'datasets/X2.csv',
+        # 'datasets/X3.csv',
+        'datasets/X4.csv',
+    )
     output = [] # type: list[tuple[str, str]]
 
-    for datasetPath in (
-        #'datasets/X2.csv',
-        'datasets/X3.csv',
-        #'datasets/X4.csv',
-    ):
+    for datasetPath in datasetPaths:
         print(f'Matching {datasetPath}')
         data = pd.read_csv(datasetPath, dtype=pd.StringDtype()) # type: pd.DataFrame
 

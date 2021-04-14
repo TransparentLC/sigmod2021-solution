@@ -12,5 +12,5 @@ fi
 if [ -f output.csv ]; then
   rm output.csv
 fi
-reprozip trace python3 main.py
+reprozip trace python3 main.py --submission
 reprozip pack submission.rpz
