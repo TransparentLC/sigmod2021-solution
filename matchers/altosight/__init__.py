@@ -4,6 +4,37 @@ from . import extract
 from .. import AbstractMatcher
 from .. import timing
 
+def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str]:
+    if instanceIdA >= instanceIdB:
+        instanceIdA, instanceIdB = instanceIdB, instanceIdA
+    return (instanceIdA, instanceIdB)
+
+def removeTransitivity(
+    c: str,
+    matchPairs: typing.Set[typing.Tuple[str, str]],
+    notMatchPairs: typing.Set[typing.Tuple[str, str]],
+    modelDict: typing.Dict[str, str]
+) -> None:
+    cModel = modelDict[c]
+    for a, b in notMatchPairs:  # type: str, str
+        aModel = modelDict[a]
+        bModel = modelDict[b]
+        if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
+            if aModel != cModel:
+                matchPairs.remove((a, c))
+            if bModel != cModel:
+                matchPairs.remove((b, c))
+        elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
+            if aModel != cModel:
+                matchPairs.remove((a, c))
+            if cModel != bModel:
+                matchPairs.remove((c, b))
+        elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
+            if cModel != aModel:
+                matchPairs.remove((c, a))
+            if cModel != bModel:
+                matchPairs.remove((c, b))
+
 class matcher(AbstractMatcher):
     @staticmethod
     def check(df: pd.DataFrame) -> bool:
@@ -28,7 +59,7 @@ class matcher(AbstractMatcher):
         df['name'] = df['name'].apply(
             lambda s: s
                 .replace('&nbsp;', ' ')
-                .replace('\\n', '')
+                .replace('\\n', ' ')
                 .strip()
         )
         df['x_size'] = df.apply(extract.size, axis=1)
@@ -36,10 +67,12 @@ class matcher(AbstractMatcher):
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
         df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
         df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
+        df['x_model'] = df.apply(extract.model, axis=1)
 
     @staticmethod
     def compare(seriesA: pd.Series, seriesB: pd.Series) -> bool:
         for colVeto in (
+            'x_model',
             'x_brand_type',
             'x_size',
             # 'x_sdcard_standard',
@@ -72,6 +105,8 @@ class matcher(AbstractMatcher):
         output = []
         for brandType, brandTypeGroup in df.groupby('x_brand_type'):
             print(f'Matching in group "{brandType}"...')
+            # matchPairs = set() # type: set[tuple[str, str]]
+            # notMatchPairs = set() # type: set[tuple[str, str]]
             brandTypeGroup.apply(
                 lambda seriesA:
                 brandTypeGroup.apply(
@@ -79,8 +114,17 @@ class matcher(AbstractMatcher):
                     seriesA.name < seriesB.name and
                     cls.compare(seriesA, seriesB) and
                     output.append((seriesA['instance_id'], seriesB['instance_id'])),
+                    # (matchPairs if cls.compare(seriesA, seriesB) else notMatchPairs)
+                    #     .add(createMatchPair(seriesA['instance_id'], seriesB['instance_id'])),
                     axis=1
                 ),
                 axis=1
             )
+            # 破坏对比失败的传递性
+            # modelDict = df[['instance_id','x_model']].set_index('instance_id').to_dict()['x_model'] # type: dict[str, str]
+            # brandTypeGroup.apply(
+            #     lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs, modelDict),
+            #     axis=1
+            # )
+            # output.extend(matchPairs)
         return output

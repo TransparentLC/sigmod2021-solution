@@ -55,3 +55,13 @@ def usbStandard(s: pd.Series) -> typing.Optional[str]:
         if v in s['name']:
             return v
     return None
+
+def model(s: pd.Series) -> typing.Optional[str]:
+    match = None
+    if s['brand'] == 'toshiba' and s['x_type'] in ('usbstick', 'sdcard'):
+        match = re.search(r'[mnu]\d0\d', s['name'])
+    elif s['brand'] == 'lexar' and s['x_type'] in ('usbstick',):
+        match = re.search(r'[cpsv]\d[05][cm]?', s['name'])
+    if match:
+        return match.group(0)
+    return None
