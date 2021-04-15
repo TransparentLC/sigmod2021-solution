@@ -25,16 +25,25 @@ class matcher(AbstractMatcher):
         for col in df.columns:
             if col != 'instance_id':
                 df[col] = df[col].str.lower()
-        df['name'] = df['name'].apply(lambda s: s.replace('&nbsp;', ' '))
+        df['name'] = df['name'].apply(
+            lambda s: s
+                .replace('&nbsp;', ' ')
+                .replace('\\n', '')
+                .strip()
+        )
         df['x_size'] = df.apply(extract.size, axis=1)
         df['x_type'] = df.apply(extract.type, axis=1)
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
+        df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
+        df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
 
     @staticmethod
     def compare(seriesA: pd.Series, seriesB: pd.Series) -> bool:
         for colVeto in (
             'x_brand_type',
             'x_size',
+            # 'x_sdcard_standard',
+            # 'x_usb_standard',
         ):
             if (
                 not pd.isna(seriesA[colVeto]) and
@@ -42,6 +51,18 @@ class matcher(AbstractMatcher):
                 seriesA[colVeto] != seriesB[colVeto]
             ):
                 return False
+
+        # for colSubstr in (
+        #     'x_sdcard_standard',
+        # ):
+        #     if (
+        #         not pd.isna(seriesA[colSubstr]) and
+        #         not pd.isna(seriesB[colSubstr]) and
+        #         not seriesA[colSubstr] in seriesB[colSubstr] and
+        #         not seriesB[colSubstr] in seriesA[colSubstr]
+        #     ):
+        #         return False
+
         return True
 
     @classmethod

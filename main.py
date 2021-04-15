@@ -7,12 +7,19 @@ import os
 import sys
 import typing
 
+IS_SUBMISSION = '--submission' in sys.argv
+
 if __name__ == '__main__':
+    if IS_SUBMISSION:
+        print('Running in submission mode!')
+    else:
+        print('Not running in submission mode!')
+
     datasetPaths = (
         'datasets/X2.csv',
         'datasets/X3.csv',
         'datasets/X4.csv',
-    ) if '--submission' in sys.argv else (
+    ) if IS_SUBMISSION else (
         # 'datasets/X2.csv',
         # 'datasets/X3.csv',
         'datasets/X4.csv',
