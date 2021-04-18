@@ -67,6 +67,7 @@ class matcher(AbstractMatcher):
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
         df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
         df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
+        df['x_color'] = df.apply(extract.color, axis=1)
         df['x_model'] = df.apply(extract.model, axis=1)
 
     @staticmethod
@@ -75,6 +76,7 @@ class matcher(AbstractMatcher):
             'x_model',
             'x_brand_type',
             'x_size',
+            'x_color',
             # 'x_sdcard_standard',
             # 'x_usb_standard',
         ):
@@ -105,26 +107,26 @@ class matcher(AbstractMatcher):
         output = []
         for brandType, brandTypeGroup in df.groupby('x_brand_type'):
             print(f'Matching in group "{brandType}"...')
-            # matchPairs = set() # type: set[tuple[str, str]]
-            # notMatchPairs = set() # type: set[tuple[str, str]]
+            matchPairs = set() # type: set[tuple[str, str]]
+            notMatchPairs = set() # type: set[tuple[str, str]]
             brandTypeGroup.apply(
                 lambda seriesA:
                 brandTypeGroup.apply(
                     lambda seriesB:
                     seriesA.name < seriesB.name and
-                    cls.compare(seriesA, seriesB) and
-                    output.append((seriesA['instance_id'], seriesB['instance_id'])),
-                    # (matchPairs if cls.compare(seriesA, seriesB) else notMatchPairs)
-                    #     .add(createMatchPair(seriesA['instance_id'], seriesB['instance_id'])),
+                    # cls.compare(seriesA, seriesB) and
+                    # output.append((seriesA['instance_id'], seriesB['instance_id'])),
+                    (matchPairs if cls.compare(seriesA, seriesB) else notMatchPairs)
+                        .add(createMatchPair(seriesA['instance_id'], seriesB['instance_id'])),
                     axis=1
                 ),
                 axis=1
             )
             # 破坏对比失败的传递性
-            # modelDict = df[['instance_id','x_model']].set_index('instance_id').to_dict()['x_model'] # type: dict[str, str]
-            # brandTypeGroup.apply(
-            #     lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs, modelDict),
-            #     axis=1
-            # )
-            # output.extend(matchPairs)
+            modelDict = df[['instance_id','x_model']].set_index('instance_id').to_dict()['x_model'] # type: dict[str, str]
+            brandTypeGroup.apply(
+                lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs, modelDict),
+                axis=1
+            )
+            output.extend(matchPairs)
         return output

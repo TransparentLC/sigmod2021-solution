@@ -18,7 +18,7 @@ def size(s: pd.Series) -> float:
         num = float(sizeRaw.group(1))
         unit = sizeRaw.group(2)
     elif not pd.isna(s['size']):
-        sizeRaw = s['size'].split(' ')  # type: list[str]
+        sizeRaw = s['size'].split(' ') # type: list[str]
         num = float(sizeRaw[0])
         unit = sizeRaw[1]
     if sizeRaw is not None:
@@ -56,12 +56,29 @@ def usbStandard(s: pd.Series) -> typing.Optional[str]:
             return v
     return None
 
+def color(s: pd.Series) -> typing.Optional[str]:
+    if s['x_type'] != 'phone':
+        return None
+    for c in (
+        'black',
+        'white',
+        'red',
+        'blue',
+        'green',
+        'gold',
+        'silver',
+    ):
+        if c in s['name']:
+            return c
+
 def model(s: pd.Series) -> typing.Optional[str]:
     match = None
     if s['brand'] == 'toshiba' and s['x_type'] in ('usbstick', 'sdcard'):
         match = re.search(r'[mnu]\d0\d', s['name'])
     elif s['brand'] == 'lexar' and s['x_type'] in ('usbstick',):
         match = re.search(r'[cpsv]\d[05][cm]?', s['name'])
+    elif s['brand'] == 'samsung' and s['x_type'] in ('phone',):
+        match = re.search(r'\bgalaxy (?:[a-z]\d{1,2}|note ?\d{1,2})\b', s['name'])
     if match:
         return match.group(0)
     return None
