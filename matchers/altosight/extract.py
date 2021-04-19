@@ -12,19 +12,23 @@ def type(s: pd.Series) -> str:
     warnings.warn(f'Unable to extract type for "{name}".')
     return 'other'
 
-def size(s: pd.Series) -> float:
-    sizeRaw = re.search(regexPattern.size, s['name'])
-    if sizeRaw:
-        num = float(sizeRaw.group(1))
-        unit = sizeRaw.group(2)
-    elif not pd.isna(s['size']):
-        sizeRaw = s['size'].split(' ') # type: list[str]
-        num = float(sizeRaw[0])
-        unit = sizeRaw[1]
-    if sizeRaw is not None:
-        if unit == 'tb':
-            num *= 1024
-        return num
+def size(s: pd.Series) -> str:
+    res=""
+    if not pd.isna(s['size']):
+        match=re.search(regexPattern.size2,s['size'])
+        if match:
+            s1=match.group(1)+" "+match.group(3).replace("go","gb")
+            res+=s1
+    
+    match=re.search(regexPattern.size,s['name'])
+    if match:
+        s2=match.group(1)+" "+match.group(2).replace("go","gb")
+        if res!=s2:
+            res+=s2
+    
+    if res!="":
+        return res
+        
     return None
 
 def sdcardStandard(s: pd.Series) -> typing.Optional[str]:
@@ -85,5 +89,5 @@ def model(s: pd.Series) -> typing.Optional[str]:
     elif s['brand'] == 'samsung' and s['x_type'] in ('phone',):
         match = re.search(r'\bgalaxy (?:[a-z]\d{1,2}|note ?\d{1,2})\b', s['name'])
     if match:
-        return match.group(0)
+        return match.group(0).replace(' ','')
     return None

@@ -3,6 +3,7 @@ import typing
 from . import extract
 from .. import AbstractMatcher
 from .. import timing
+import re
 
 def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str]:
     if instanceIdA >= instanceIdB:
@@ -76,7 +77,6 @@ class matcher(AbstractMatcher):
         for colVeto in (
             'x_model',
             'x_brand_type',
-            'x_size',
             'x_color',
             'x_sdcard_is_micro',
             # 'x_sdcard_standard',
@@ -90,15 +90,21 @@ class matcher(AbstractMatcher):
                 return False
 
         for colSubstr in (
+            'x_size',
             # 'x_sdcard_standard',
         ):
             if (
                 not pd.isna(seriesA[colSubstr]) and
-                not pd.isna(seriesB[colSubstr]) and
-                not seriesA[colSubstr] in seriesB[colSubstr] and
-                not seriesB[colSubstr] in seriesA[colSubstr]
-            ):
-                return False
+                not pd.isna(seriesB[colSubstr])):
+                l1=re.findall(re.compile(r'\d{1,4}'),seriesA[colSubstr])
+                l2=re.findall(re.compile(r'\d{1,4}'),seriesB[colSubstr])
+
+                for x in l1:
+                    for y in l2:
+                        if x==y:
+                            return True
+                            
+                return False                
 
         return True
 
