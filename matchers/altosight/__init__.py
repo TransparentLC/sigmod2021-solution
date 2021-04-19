@@ -66,6 +66,7 @@ class matcher(AbstractMatcher):
         df['x_type'] = df.apply(extract.type, axis=1)
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
         df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
+        df['x_sdcard_is_micro'] = df.apply(extract.sdcardIsMicro, axis=1)
         df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
         df['x_color'] = df.apply(extract.color, axis=1)
         df['x_model'] = df.apply(extract.model, axis=1)
@@ -77,6 +78,7 @@ class matcher(AbstractMatcher):
             'x_brand_type',
             'x_size',
             'x_color',
+            'x_sdcard_is_micro',
             # 'x_sdcard_standard',
             # 'x_usb_standard',
         ):
@@ -87,16 +89,16 @@ class matcher(AbstractMatcher):
             ):
                 return False
 
-        # for colSubstr in (
-        #     'x_sdcard_standard',
-        # ):
-        #     if (
-        #         not pd.isna(seriesA[colSubstr]) and
-        #         not pd.isna(seriesB[colSubstr]) and
-        #         not seriesA[colSubstr] in seriesB[colSubstr] and
-        #         not seriesB[colSubstr] in seriesA[colSubstr]
-        #     ):
-        #         return False
+        for colSubstr in (
+            # 'x_sdcard_standard',
+        ):
+            if (
+                not pd.isna(seriesA[colSubstr]) and
+                not pd.isna(seriesB[colSubstr]) and
+                not seriesA[colSubstr] in seriesB[colSubstr] and
+                not seriesB[colSubstr] in seriesA[colSubstr]
+            ):
+                return False
 
         return True
 

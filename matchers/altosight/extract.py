@@ -44,6 +44,11 @@ def sdcardStandard(s: pd.Series) -> typing.Optional[str]:
         return 'sdhc'
     return None
 
+def sdcardIsMicro(s: pd.Series) -> typing.Optional[bool]:
+    if s['x_type'] != 'sdcard':
+        return None
+    return 'micro' in s['name']
+
 def usbStandard(s: pd.Series) -> typing.Optional[str]:
     if s['x_type'] != 'usbstick':
         return None
