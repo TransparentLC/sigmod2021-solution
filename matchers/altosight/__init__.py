@@ -70,6 +70,7 @@ class matcher(AbstractMatcher):
         df['x_sdcard_is_micro'] = df.apply(extract.sdcardIsMicro, axis=1)
         df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
         df['x_color'] = df.apply(extract.color, axis=1)
+        df['x_tv_size'] = df.apply(extract.tvSize, axis=1)
         df['x_model'] = df.apply(extract.model, axis=1)
 
     @staticmethod
@@ -82,6 +83,7 @@ class matcher(AbstractMatcher):
             'x_sdcard_is_micro',
             # 'x_sdcard_standard',
             # 'x_usb_standard',
+            'x_tv_size',
         ):
             if (
                 not pd.isna(seriesA[colVeto]) and
