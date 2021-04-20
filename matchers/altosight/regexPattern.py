@@ -10,5 +10,4 @@ type = {k: re.compile(v) for k, v in {
     'hdd': r'\b(?:hdd|disque|disco rigido|disque dur)\b',
 }.items()}
 
-size = re.compile(r'\b((?:\d+g[bo]|tb\.)?\d+) ?(g[bo]|tb)(?! ?ram)\b')
-size2=re.compile(r'\b(\d+)( |)(g[bo]|tb)')
+size = re.compile(r'\b((?:\d+\.)?\d+) ?(g[bo]|tb)(?! ?ram)\b')

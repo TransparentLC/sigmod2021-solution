@@ -12,24 +12,35 @@ def type(s: pd.Series) -> str:
     warnings.warn(f'Unable to extract type for "{name}".')
     return 'other'
 
-def size(s: pd.Series) -> str:
-    res=""
-    if not pd.isna(s['size']):
-        match=re.search(regexPattern.size2,s['size'])
-        if match:
-            s1=match.group(1)+" "+match.group(3).replace("go","gb")
-            res+=s1
-    
-    match=re.search(regexPattern.size,s['name'])
+def size(s: pd.Series) -> float:
+    match = re.search(regexPattern.size, s['name'])
+    matchSize = None
     if match:
-        s2=match.group(1)+" "+match.group(2).replace("go","gb")
-        if res!=s2:
-            res+=s2
-    
-    if res!="":
-        return res
-        
-    return None
+        matchSize = float(match.group(1))
+        matchUnit = match.group(2)
+    elif not pd.isna(s['size']):
+        match = s['size'].split(' ') # type: list[str]
+        matchSize = float(match[0])
+        matchUnit = match[1]
+    if matchSize is not None:
+        if matchUnit == 'tb':
+            matchSize *= 1024
+        return matchSize
+
+def sizeLoose(s: pd.Series) -> str:
+    res = set()
+
+    for c in ('size', 'name'):
+        if pd.isna(s[c]):
+            continue
+        matches = re.findall(regexPattern.size, s[c]) # type: list[tuple[str]]
+        for matchSize, matchUnit in matches:
+            matchSize = int(matchSize)
+            if matchUnit == 'tb':
+                matchSize *= 1024
+            res.add(int(matchSize))
+
+    return ' '.join(str(x) for x in res) if res else None
 
 def sdcardStandard(s: pd.Series) -> typing.Optional[str]:
     if s['x_type'] != 'sdcard':
