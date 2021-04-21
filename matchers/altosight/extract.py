@@ -104,14 +104,14 @@ def model(s: pd.Series) -> typing.Optional[str]:
     match = None
     if s['brand'] == 'toshiba' and s['x_type'] in ('usbstick', 'sdcard'):
         match = re.search(r'[mnu]\d0\d', s['name'])
-    elif s['brand'] == 'lexar' and s['x_type'] in ('usbstick',):
+    elif s['brand'] == 'lexar' and s['x_type'] == 'usbstick':
         match = re.search(r'[cpsv]\d[05][cm]?', s['name'])
-    elif s['brand'] == 'samsung' and s['x_type'] in ('phone',):
+    elif s['brand'] == 'samsung' and s['x_type'] == 'phone':
         match = re.search(r'\bgalaxy (?:[a-z]\d{1,2}|note ?\d{1,2})\b', s['name'])
     elif s['brand'] == 'sony':
         if s['x_type'] == 'sdcard':
             match = re.search(
-                r'\b(?:sf-?(?:\d{1,3}n4|[gm]\d{1,3}t|[em]\d{1,3})|sr-?\d{1,3}(?:ux2[ab]|uy[23]?a|[hu]xa|a[41](?: ?[pv])?)|sf-?(?:\d{1,3}(?:[un][41]|nx|ux(?:2b?)?|uy[23]?|b[f4])|g\d{1,3})|sn-?(?:bb\d{1,3}|ba\d{1,3} ?f?))\b',
+                r'\b(?:sf-?(?:\d{1,3}n4|[gm]\d{1,3}t|[em]\d{1,3})|sr-?\d{1,3}(?:ux2[ab]|uy[23]?a|[hu]xa|a[41](?: ?[pv])?)|sf-?(?:\d{1,3}(?:[un][41]|nx|ux(?:2b?)?|uy[23]?|b[f4]|u)|g\d{1,3})|sn-?(?:bb\d{1,3}|ba\d{1,3} ?f?))\b',
                 s['name']
             )
         elif s['x_type'] == 'usbstick':
@@ -121,6 +121,17 @@ def model(s: pd.Series) -> typing.Optional[str]:
             )
         if match:
             return match.group(0).replace(' ', '').replace('-', '')
+    elif s['brand'] == 'sandisk' and s['x_type'] == 'usbstick':
+        match = re.search(r'\bglide|dual|fit\b', s['name'])
+    # elif s['brand'] == 'intenso' and s['x_type'] == 'usbstick':
+    #     for c in (
+    #         'premium',
+    #         'rainbow',
+    #         'basic',
+    #     ):
+    #         if c in s['name']:
+    #             return c
+
     if match:
         return match.group(0).replace(' ', '')
     return None

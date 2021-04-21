@@ -11,9 +11,9 @@ IS_SUBMISSION = '--submission' in sys.argv
 
 if __name__ == '__main__':
     if IS_SUBMISSION:
-        print('Running in submission mode!')
+        print('\033[92mRunning in submission mode!\033[39m')
     else:
-        print('Not running in submission mode!')
+        print('\033[96mNot running in submission mode...\033[39m')
 
     datasetPaths = (
         'datasets/X2.csv',

@@ -59,6 +59,8 @@ class matcher(AbstractMatcher):
         df['name'] = df['name'].apply(
             lambda s: s
                 .replace('&nbsp;', ' ')
+                .replace('&reg;', ' ')
+                .replace('&trade;', ' ')
                 .replace('\\n', ' ')
                 .strip()
         )
