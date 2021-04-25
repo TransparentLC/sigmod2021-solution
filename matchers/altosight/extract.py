@@ -9,6 +9,19 @@ def type(s: pd.Series) -> str:
     for k, r in regexPattern.type.items(): # type: str, re.Pattern
         if re.search(r, name):
             return k
+    # 我没有说要钦定，没有任何这个意思
+    # 产品的类型，还是要按照基本法、选举法，去产生
+    # forcedlySetTypes = {
+    #     'altosight.com//1513': 'usbstick',
+    #     'altosight.com//3476': 'usbstick',
+    #     'altosight.com//10745': 'usbstick',
+    # }
+    # if s['instance_id'] in forcedlySetTypes.keys():
+    #     return forcedlySetTypes[s['instance_id']]
+    if s['brand'] == 'pny' and ('attaché' in s['name'] or 'attache' in s['name']):
+        return 'usbstick'
+    elif s['brand'] == 'sandisk' and 'extreme' in s['name']:
+        return 'usbstick'
     warnings.warn(f'Unable to extract type for "{name}".')
     return 'other'
 
@@ -63,6 +76,21 @@ def sdcardIsMicro(s: pd.Series) -> typing.Optional[bool]:
     if s['x_type'] != 'sdcard':
         return None
     return 'micro' in s['name']
+
+def sdcardUhsLevel(s: pd.Series) -> typing.Optional[int]:
+    if s['x_type'] != 'sdcard':
+        return None
+    match = re.search(r'(?:uhs[- ]?)([123]|i{1,3})\b', s['name'])
+    if match:
+        return int(match.group(1)) if match.group(1).isdigit() else len(match.group(1))
+
+
+def sdcardAdapterSize(s: pd.Series) -> typing.Optional[str]:
+    if s['x_type'] != 'sdcard':
+        return None
+    match = re.search(r'\bsd adapter (\d+) ?gb\b', s['name'])
+    if match:
+        return int(match.group(1))
 
 def usbStandard(s: pd.Series) -> typing.Optional[str]:
     if s['x_type'] != 'usbstick':
@@ -122,12 +150,15 @@ def model(s: pd.Series) -> typing.Optional[str]:
         if match:
             return match.group(0).replace(' ', '').replace('-', '')
     elif s['brand'] == 'sandisk' and s['x_type'] == 'usbstick':
-        match = re.search(r'\bglide|dual|fit\b', s['name'])
+        match = re.search(r'\bglide|dual|fit|extreme\b', s['name'])
+    elif s['brand'] == 'sandisk' and s['x_type'] == 'sdcard':
+        match = re.search(r'\bextreme|ultra\b', s['name'])
     # elif s['brand'] == 'intenso' and s['x_type'] == 'usbstick':
     #     for c in (
     #         'premium',
     #         'rainbow',
     #         'basic',
+    #         'speed',
     #     ):
     #         if c in s['name']:
     #             return c

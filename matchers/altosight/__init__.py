@@ -68,9 +68,11 @@ class matcher(AbstractMatcher):
         df['x_size_loose'] = df.apply(extract.sizeLoose, axis=1)
         df['x_type'] = df.apply(extract.type, axis=1)
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
-        df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
+        # df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
         df['x_sdcard_is_micro'] = df.apply(extract.sdcardIsMicro, axis=1)
-        df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
+        # df['x_sdcard_uhs_level'] = df.apply(extract.sdcardUhsLevel, axis=1)
+        df['x_sdcard_adapter_size'] = df.apply(extract.sdcardAdapterSize, axis=1)
+        # df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
         df['x_color'] = df.apply(extract.color, axis=1)
         df['x_tv_size'] = df.apply(extract.tvSize, axis=1)
         df['x_model'] = df.apply(extract.model, axis=1)
@@ -83,7 +85,9 @@ class matcher(AbstractMatcher):
             'x_size',
             'x_color',
             'x_sdcard_is_micro',
+            # 'x_sdcard_uhs_level',
             # 'x_sdcard_standard',
+            'x_sdcard_adapter_size',
             # 'x_usb_standard',
             'x_tv_size',
         ):
