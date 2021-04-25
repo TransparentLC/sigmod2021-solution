@@ -105,19 +105,33 @@ def usbStandard(s: pd.Series) -> typing.Optional[str]:
     return None
 
 def color(s: pd.Series) -> typing.Optional[str]:
-    if s['x_type'] != 'phone':
-        return None
-    for c in (
-        'black',
-        'white',
-        'red',
-        'blue',
-        'green',
-        'gold',
-        'silver',
+    colorAliases = {
+        'blanc': 'white',
+        'blanco': 'white',
+        'bianco': 'white',
+        'plata': 'silver',
+        'plateado': 'silver',
+        'argento': 'silver',
+    }
+    if (
+        s['x_type'] == 'phone' or
+        s['x_type'] == 'usbstick' and s['brand'] == 'toshiba'
     ):
-        if c in s['name']:
-            return c
+        for c in (
+            'black',
+            'white',
+            'red',
+            'blue',
+            'green',
+            'gold',
+            'silver',
+            *colorAliases.keys()
+        ):
+            if re.search(r'(?:\b|^)' + c + r'(?:\b|$)', s['name']):
+                if c in colorAliases.keys():
+                    return colorAliases[c]
+                return c
+    return None
 
 def tvSize(s: pd.Series) -> typing.Optional[float]:
     if s['x_type'] != 'tv':
