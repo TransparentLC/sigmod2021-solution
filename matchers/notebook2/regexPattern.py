@@ -15,7 +15,9 @@ brand = {k: re.compile(v) for k, v in {
 
 weight = re.compile(r'\b([0-9]*\.?[0-9]+) ?((?:kg|pounds|lbs?|oz))\b')
 
-disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
+# disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
+# 252行：128 ssd待解决
+disk = re.compile(r'\b([0-9]+) ?((?:gb|tb))(?: (?:\d+ ?rpm ?)?(ram|hdd|hd|sata|mechanical_hard_drive|hard drive|ssd|flash_memory_solid_state))?(?: \/ \d+ ?rpm)?\b')
 
 cpuBrand = {k: re.compile(v) for k, v in {
     'intel core': r'\b(?:intel\.?|core) i[3579]\b',

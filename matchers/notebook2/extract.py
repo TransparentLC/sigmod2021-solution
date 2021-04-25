@@ -54,7 +54,8 @@ def diskCapacity(s: pd.Series) -> pd.Series:
     ssd = 0
     hddGuess = False
     ssdGuess = False
-    for col in ('hdd_capacity', 'ssd_capacity', 'title'):
+    # 有些硬盘大小写在ram_type里
+    for col in ('hdd_capacity', 'ssd_capacity', 'title', 'ram_type'):
         if pd.isna(s[col]):
             continue
         matches = regexPattern.disk.findall(s[col]) # type: list[tuple[str, str, str]]
@@ -74,12 +75,18 @@ def diskCapacity(s: pd.Series) -> pd.Series:
             # 只有在HDD/SSD那一列搜索时才不要求出现类型
             # 但是也有title写着ssd，hdd_capacity也写着ssd，但是ssd_capacity空着的情况
             # 这样的结果就是HDD和SSD都是相同的值，需要把其中一个设为0
-            if type == '' and col == 'hdd_capacity' or type in ('hdd', 'sata', 'mechanical_hard_drive', 'hard drive'):
+            if type == '' and col == 'hdd_capacity' or type in ('hdd', 'hd','sata', 'mechanical_hard_drive', 'hard drive'):
+                # 针对形如 memory size 4gb hard disk 180gb ssd
+                if capacity < 20:
+                    continue
                 hddGuess = type == '' and col == 'hdd_capacity'
                 hdd = capacity
             elif type == '' and col == 'ssd_capacity' or type in ('ssd', 'flash_memory_solid_state'):
                 ssdGuess = type == '' and col == 'ssd_capacity'
                 ssd = capacity
+            # 若此时还未获取到大小，则从title中获取500gb这种没有标注hdd还是sdd的当作hdd处理
+            elif type == '' and col == 'title' and capacity >= 20 and hdd == 0 and ssd == 0:
+                hdd = capacity
 
     if hdd == 0 and ssd == 0:
         warnings.warn(f'Unable to extract disk capacity for "{s["title"]}".')
