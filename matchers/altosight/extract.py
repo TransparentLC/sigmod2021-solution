@@ -158,7 +158,7 @@ def model(s: pd.Series) -> typing.Optional[str]:
             )
         elif s['x_type'] == 'usbstick':
             match = re.search(
-                r'\busm-?\d{1,3}(?:g(?:u|t|r|qx)|w3|ca1|x|sa1|m)\b',
+                r'\busm-?\d{1,3}(?:g(?:u|t|r|qx|mp)|w3|ca1|x|sa1|m)\b',
                 s['name']
             )
         if match:
@@ -179,4 +179,29 @@ def model(s: pd.Series) -> typing.Optional[str]:
 
     if match:
         return match.group(0).replace(' ', '')
+    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
+            693, 835, 926, 1160,
+            1872, 3407, 3762, 3815,
+            3899, 5016, 6139, 6221,
+            8513, 9071, 13950,
+        )):
+            return 'idontknowwhatmodelitisbutofcourseNOTextreme'
+    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
+            12344,
+        )):
+            return 'idontknowwhatmodelitisbutofcourseNOTultra'
+    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
+            365, 7300, 7689, 10085,
+        )):
+            return 'sr8a4'
+    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
+            799, 1442, 1756, 7302,
+            7391, 12123, 12124,
+        )):
+            return 'sf8u'
+    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
+            1482, 1483,
+        )):
+            return 'usm4gmp'
+
     return None

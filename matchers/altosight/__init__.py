@@ -65,7 +65,7 @@ class matcher(AbstractMatcher):
                 .strip()
         )
         df['x_size'] = df.apply(extract.size, axis=1)
-        df['x_size_loose'] = df.apply(extract.sizeLoose, axis=1)
+        # df['x_size_loose'] = df.apply(extract.sizeLoose, axis=1)
         df['x_type'] = df.apply(extract.type, axis=1)
         df['x_brand_type'] = df.apply(lambda s: f'{s["brand"]}-{s["x_type"]}', axis=1)
         # df['x_sdcard_standard'] = df.apply(extract.sdcardStandard, axis=1)
