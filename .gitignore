@@ -119,3 +119,5 @@ dmypy.json
 extract-*.csv
 output.csv
 submission.rpz
+utils/account.ini
+utils/snowman-exports/
