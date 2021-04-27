@@ -13,26 +13,35 @@ def removeTransitivity(
     c: str,
     matchPairs: typing.Set[typing.Tuple[str, str]],
     notMatchPairs: typing.Set[typing.Tuple[str, str]],
-    modelDict: typing.Dict[str, str]
+    modelDict: typing.Dict[str, str],
+    sizeDict: typing.Dict[str, float]
 ) -> None:
-    cModel = modelDict[c]
+    def keep(a: str, b: str, modelDict: typing.Dict[str, str], sizeDict: typing.Dict[str, float]) -> bool:
+        if modelDict[a] != modelDict[b]:
+            return False
+        if (
+            (sizeDict[a] is not None) and
+            (sizeDict[b] is not None) and
+            sizeDict[a] != sizeDict[b]
+        ):
+            return False
+        return True
+
     for a, b in notMatchPairs:  # type: str, str
-        aModel = modelDict[a]
-        bModel = modelDict[b]
         if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
-            if aModel != cModel:
+            if not keep(a, c, modelDict, sizeDict):
                 matchPairs.remove((a, c))
-            if bModel != cModel:
+            if not keep(b, c, modelDict, sizeDict):
                 matchPairs.remove((b, c))
         elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
-            if aModel != cModel:
+            if not keep(a, c, modelDict, sizeDict):
                 matchPairs.remove((a, c))
-            if cModel != bModel:
+            if not keep(c, b, modelDict, sizeDict):
                 matchPairs.remove((c, b))
         elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
-            if cModel != aModel:
+            if not keep(c, a, modelDict, sizeDict):
                 matchPairs.remove((c, a))
-            if cModel != bModel:
+            if not keep(c, b, modelDict, sizeDict):
                 matchPairs.remove((c, b))
 
 class matcher(AbstractMatcher):
@@ -144,8 +153,9 @@ class matcher(AbstractMatcher):
             )
             # 破坏对比失败的传递性
             modelDict = df[['instance_id','x_model']].set_index('instance_id').to_dict()['x_model'] # type: dict[str, str]
+            sizeDict = df[['instance_id','x_size']].set_index('instance_id').to_dict()['x_size'] # type: dict[str, float]
             brandTypeGroup.apply(
-                lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs, modelDict),
+                lambda series: removeTransitivity(series['instance_id'], matchPairs, notMatchPairs, modelDict, sizeDict),
                 axis=1
             )
             output.extend(matchPairs)

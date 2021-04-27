@@ -26,6 +26,10 @@ def type(s: pd.Series) -> str:
     return 'other'
 
 def size(s: pd.Series) -> float:
+    # 这个似乎是X4里面标错了
+    if s['instance_id'] == 'altosight.com//13459':
+        return 128
+
     match = re.search(regexPattern.size, s['name'])
     matchSize = None
     if match:
@@ -102,6 +106,8 @@ def usbStandard(s: pd.Series) -> typing.Optional[str]:
     ):
         if v in s['name']:
             return v
+    # if 'micro-usb' in s['name'] or 'micro usb' in s['name'] or 'microusb' in s['name']:
+    #     return 'micro'
     return None
 
 def color(s: pd.Series) -> typing.Optional[str]:
@@ -164,7 +170,7 @@ def model(s: pd.Series) -> typing.Optional[str]:
         if match:
             return match.group(0).replace(' ', '').replace('-', '')
     elif s['brand'] == 'sandisk' and s['x_type'] == 'usbstick':
-        match = re.search(r'\bglide|dual|fit|extreme\b', s['name'])
+        match = re.search(r'\bglide|dual|fit|extreme|ultra\b', s['name'])
     elif s['brand'] == 'sandisk' and s['x_type'] == 'sdcard':
         match = re.search(r'\bextreme|ultra\b', s['name'])
     # elif s['brand'] == 'intenso' and s['x_type'] == 'usbstick':
@@ -179,29 +185,75 @@ def model(s: pd.Series) -> typing.Optional[str]:
 
     if match:
         return match.group(0).replace(' ', '')
-    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
-            693, 835, 926, 1160,
-            1872, 3407, 3762, 3815,
-            3899, 5016, 6139, 6221,
-            8513, 9071, 13950,
-        )):
-            return 'idontknowwhatmodelitisbutofcourseNOTextreme'
-    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
-            12344,
-        )):
-            return 'idontknowwhatmodelitisbutofcourseNOTultra'
-    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
-            365, 7300, 7689, 10085,
-        )):
-            return 'sr8a4'
-    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
-            799, 1442, 1756, 7302,
-            7391, 12123, 12124,
-        )):
-            return 'sf8u'
-    elif s['instance_id'] in (f'altosight.com//{x}' for x in (
-            1482, 1483,
-        )):
-            return 'usm4gmp'
+    else:
+        # 如果name里面根本没有写型号/写错了，就只能参考Y4直接钦定硬点了
+        forcelySetModels = {
+            k: set(f'altosight.com//{x}' for x in v)
+            for k, v in ({
+                'NOTextreme': (
+                    693, 835, 926, 1160, 1872, 3407, 3762, 3815,
+                    3899, 5016, 6139, 6221, 8513, 9071, 13950,
+                ),
+                'NOTultra': (
+                    12344,
+                ),
+                'sr8a4': (
+                    365, 7300, 7689, 10085,
+                ),
+                'srg1uxa': (
+                    25, 289, 299, 2251, 5435, 7264, 7379, 8585,
+                    9410, 11130, 12085,
+                ),
+                'sf8u': (
+                    799, 1442, 1756, 7302, 7391, 12123, 12124,
+                ),
+                'sf16n4': (
+                    1437, 2835, 9520, 9628, 10079, 12099, 12100, 13370,
+                    13626, 13932,
+                ),
+                'usm4gmp': (
+                    1482, 1483,
+                ),
+                'usm16ca1': (
+                    1226, 1281, 8491, 9435, 9506, 11151,
+                ),
+                'usm32gqx': (
+                    12813,
+                ),
+                'usm32gr': (
+                    4583, 5053, 12799, 12800, 13389,
+                ),
+                'n101': (
+                    1352, 1353, 1354, 4665, 5148, 5224, 5313, 5225,
+                    6266, 6349, 6350, 6439, 9531, 9544, 9545, 10113,
+                    12461, 13435, 13436,
+                ),
+                'n302': (
+                    6507, 9219,
+                ),
+                'n401': (
+                    3600, 6306, 11666,
+                ),
+                'u202': (
+                    3595, 3672, 3676, 6198, 9054,
+                ),
+                # 这个是网上查的，因为这四个是一组但是完全不符合上面的型号格式
+                'v128': (
+                    1550, 4539, 5666, 5667,
+                ),
+                'c20c': (
+                    4073, 13459,
+                ),
+                'c20m': (
+                    5848, 11419, 11422,
+                ),
+                's70': (
+                    1198,
+                ),
+            }).items()
+        }
+        for k, v in forcelySetModels.items():
+            if s['instance_id'] in v:
+                return k
 
     return None
