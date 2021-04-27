@@ -87,7 +87,21 @@ def SSDSim(seriesA, seriesB):
     if (
             'x_ssd_capacity' in  seriesA.keys() and
             'x_ssd_capacity' in  seriesB.keys() and
+            seriesA['x_ssd_capacity'] != 0 and
+            seriesB['x_ssd_capacity'] != 0 and
             seriesA['x_ssd_capacity'] != seriesB['x_ssd_capacity']
+        ):
+            return False
+    return True
+
+def HDDSim(seriesA, seriesB):
+    #HDD capacity
+    if (
+            'x_hdd_capacity' in  seriesA.keys() and
+            'x_hdd_capacity' in  seriesB.keys() and
+            seriesA['x_hdd_capacity'] != 0 and
+            seriesB['x_hdd_capacity'] != 0 and
+            seriesA['x_hdd_capacity'] != seriesB['x_hdd_capacity']
         ):
             return False
     return True
@@ -95,6 +109,10 @@ def SSDSim(seriesA, seriesB):
 def ProdSim(seriesA, seriesB):
     #判断是否相等
     if RTSim(seriesA, seriesB) and CBSim(seriesA, seriesB) :
+        if not SSDSim(seriesA, seriesB): 
+            return False
+        if not HDDSim(seriesA, seriesB): 
+            return False
         if not MSim(seriesA, seriesB): 
             return False
         if CMSim(seriesA, seriesB) and RCSim(seriesA, seriesB) :#and CFSim(seriesA, seriesB): #加了CF的比较，自测下降了...
