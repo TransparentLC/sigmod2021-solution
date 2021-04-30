@@ -127,6 +127,19 @@ def cpuModel(s: pd.Series) -> str:
                         return f'{coreType}-{coreSeries}'
                     elif s['x_cpu_brand'] == 'amd':
                         return f'{match.group(1)}-{match.group(2)}'
+        for col in ('cpu_brand', 'cpu_model', 'title', 'cpu_type', 'cpu_brand'):
+            if not pd.isna(s[col]):
+                match = re.search(regexPattern.cpuModelLose[s['x_cpu_brand']], s[col])
+                if match:
+                    if s['x_cpu_brand'] in ('intel celeron', 'intel pentium'):
+                        return match.group(0)
+                    elif s['x_cpu_brand'] == 'intel core':
+                        coreType = match.group(1)
+                        return f'{coreType}'
+                    elif s['x_cpu_brand'] == 'amd':
+                        if match.group(1) == 'e-series':
+                            return 'e'
+                        return f'{match.group(1)}'
     warnings.warn(f'Unable to extract CPU model for "{s["title"]}".')
     return None
 
