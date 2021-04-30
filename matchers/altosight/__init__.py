@@ -9,6 +9,17 @@ def createMatchPair(instanceIdA: str, instanceIdB: str) -> typing.Tuple[str, str
         instanceIdA, instanceIdB = instanceIdB, instanceIdA
     return (instanceIdA, instanceIdB)
 
+def keepTransitivity(a: str, b: str, modelDict: typing.Dict[str, str], sizeDict: typing.Dict[str, float]) -> bool:
+    if modelDict[a] != modelDict[b]:
+        return False
+    if (
+        (sizeDict[a] is not None) and
+        (sizeDict[b] is not None) and
+        sizeDict[a] != sizeDict[b]
+    ):
+        return False
+    return True
+
 def removeTransitivity(
     c: str,
     matchPairs: typing.Set[typing.Tuple[str, str]],
@@ -16,32 +27,22 @@ def removeTransitivity(
     modelDict: typing.Dict[str, str],
     sizeDict: typing.Dict[str, float]
 ) -> None:
-    def keep(a: str, b: str, modelDict: typing.Dict[str, str], sizeDict: typing.Dict[str, float]) -> bool:
-        if modelDict[a] != modelDict[b]:
-            return False
-        if (
-            (sizeDict[a] is not None) and
-            (sizeDict[b] is not None) and
-            sizeDict[a] != sizeDict[b]
-        ):
-            return False
-        return True
 
     for a, b in notMatchPairs:  # type: str, str
         if a < b and b < c and (a, c) in matchPairs and (b, c) in matchPairs:
-            if not keep(a, c, modelDict, sizeDict):
+            if not keepTransitivity(a, c, modelDict, sizeDict):
                 matchPairs.remove((a, c))
-            if not keep(b, c, modelDict, sizeDict):
+            if not keepTransitivity(b, c, modelDict, sizeDict):
                 matchPairs.remove((b, c))
         elif a < c and c < b and (a, c) in matchPairs and (c, b) in matchPairs:
-            if not keep(a, c, modelDict, sizeDict):
+            if not keepTransitivity(a, c, modelDict, sizeDict):
                 matchPairs.remove((a, c))
-            if not keep(c, b, modelDict, sizeDict):
+            if not keepTransitivity(c, b, modelDict, sizeDict):
                 matchPairs.remove((c, b))
         elif c < a and a < b and (c, a) in matchPairs and (c, b) in matchPairs:
-            if not keep(c, a, modelDict, sizeDict):
+            if not keepTransitivity(c, a, modelDict, sizeDict):
                 matchPairs.remove((c, a))
-            if not keep(c, b, modelDict, sizeDict):
+            if not keepTransitivity(c, b, modelDict, sizeDict):
                 matchPairs.remove((c, b))
 
 class matcher(AbstractMatcher):
@@ -83,11 +84,15 @@ class matcher(AbstractMatcher):
         df['x_sdcard_adapter_size'] = df.apply(extract.sdcardAdapterSize, axis=1)
         # df['x_usb_standard'] = df.apply(extract.usbStandard, axis=1)
         df['x_color'] = df.apply(extract.color, axis=1)
+        df['x_exceria'] = df.apply(extract.exceria, axis=1)
         df['x_tv_size'] = df.apply(extract.tvSize, axis=1)
         df['x_model'] = df.apply(extract.model, axis=1)
 
     @staticmethod
     def compare(seriesA: pd.Series, seriesB: pd.Series) -> bool:
+        # if seriesA['instance_id'] == 'altosight.com//' and seriesB['instance_id'] == 'altosight.com//':
+        #     print('debug')
+
         for colVeto in (
             'x_model',
             'x_brand_type',
@@ -99,6 +104,7 @@ class matcher(AbstractMatcher):
             'x_sdcard_adapter_size',
             # 'x_usb_standard',
             'x_tv_size',
+            'x_exceria',
         ):
             if (
                 not pd.isna(seriesA[colVeto]) and
