@@ -27,12 +27,19 @@ cpuBrand = {k: re.compile(v) for k, v in {
 }.items()}
 
 cpuModel = {k: re.compile(v) for k, v in {
-    'intel core': r'\b(i[3579])(?: |-| - )(\d{3,5}[a-z]{0,2}|[a-z]\d{3,5})\b',
+    'intel core': r'(i[3579])(?: |-| - )(\d{3,5}[a-z]{0,2}|[a-z]\d{3,5})',
     'intel pentium': r'\b(?:\d{4}[a-z]|n\d{4})\b',
     'intel celeron': r'\b(?:\d{4}[a-z]|n\d{4}|(?<=celeron )\d{3})\b',
     # 参见 https://zh.wikipedia.org/zh-cn/AMD加速处理器列表
     # [^-a-z\d]+是为了不与某种格式的笔记本型号混淆……
     'amd': r'\b([ae](?:[12468]|10|12)|e|p)[ -]?((?:[1-9]\d{1,2}[05])[a-z]{0,2})(?:[^-a-z\d]+\b|$)',
+}.items()}
+
+cpuModelLose = {k: re.compile(v) for k, v in {
+    'intel core': r'\b(i[3579])\b',
+    'intel pentium': r'\b(?:\d{4}[a-z]|n\d{4})\b',
+    'intel celeron': r'\b(?:\d{4}[a-z]|n\d{4}|(?<=celeron )\d{3})\b',
+    'amd': r'\b([ae](?:[12468]|10|12)|e-series|phenom|athlon neo|athlon)\b',
 }.items()}
 
 cpuFrequency = re.compile(r'((?:\d[\. ])?\d+) ?([gm]hz)')
