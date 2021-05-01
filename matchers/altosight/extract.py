@@ -96,8 +96,8 @@ def sdcardIsMicro(s: pd.Series) -> typing.Optional[bool]:
     if s['x_type'] != 'sdcard':
         return None
     if s['instance_id'] in set(f'altosight.com//{x}' for x in (
-        776, 777, 909, 1129, 4121, 4122, 4123, 7300,
-        12761, 13375, 13611,
+        776, 777, 909, 1129, 3566, 4010, 4121, 4122,
+        4123, 4537, 4842, 7300, 11617, 12761, 13375, 13611,
     )):
         return True
     return 'micro' in s['name']
@@ -195,7 +195,7 @@ def model(s: pd.Series) -> typing.Optional[str]:
             'ultra': (
                 68, 776, 777, 909, 12341, 12344,
             ),
-            'cruzer': (
+            'fit': (
                 3156,
             ),
             'sr8a4': (
@@ -282,12 +282,26 @@ def model(s: pd.Series) -> typing.Optional[str]:
                 r'\busm-?\d{1,3}(?:g(?:u|t|r|qx|mp)|w3|ca1|x|sa1|m)\b',
                 s['name']
             )
+        elif s['x_type'] == 'hdd':
+            match = re.search(
+                r'\b(?:hd-?(?:b ?[12]|e ?[12]|eg ?5|sg ?5|sl ?[12]|sp ?1|s1a|e1h|eg5u|pg ?[35]|pg5u))\b',
+                s['name']
+            )
+        elif s['x_type'] == 'ssd':
+            match = re.search(
+                r'\b(?:(?:sl-(?:eg ?[25]|mg ?5|bg ?[12]|m ?[12]|e ?1))|(?:slw-mg ?[24]))\b',
+                s['name']
+            )
         if match:
             return match.group(0).replace(' ', '').replace('-', '')
     elif s['brand'] == 'sandisk' and s['x_type'] == 'usbstick':
         match = re.search(r'\bglide|dual|fit|extreme(?: pro)?|ultra\b', s['name'])
     elif s['brand'] == 'sandisk' and s['x_type'] == 'sdcard':
         match = re.search(r'\bextreme|ultra\b', s['name'])
+    elif s['brand'] == 'kingston' and s['x_type'] == 'usbstick':
+        match = re.search(r'g(?:en)? ?(\d+)\b', s['name'])
+        if match:
+            return f'g{match.group(1)}'
     # elif s['brand'] == 'intenso' and s['x_type'] == 'usbstick':
     #     for c in (
     #         'premium',
